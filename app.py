@@ -12,7 +12,7 @@ from datetime import datetime
 # Load environment variables
 load_dotenv()
 
-# Initialize OpenAI client
+# Initialise OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Bank email mapping dictionary
@@ -40,7 +40,7 @@ st.markdown("""
 
 
 
-# Initialize session state
+# Initialise session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "tax_records" not in st.session_state:
@@ -353,7 +353,7 @@ If conditions are NOT met:
     st.rerun()
 
 # My Tax Portal Section
-st.markdown("---")  # Visual separator
+st.markdown("---")
 st.markdown("""
     <div style="background-color: #2D7BB9; padding: 20px; border-radius: 10px; margin-top: 10px;">
         <h2 style="color: white; margin-top: 0;">My Tax Portal</h2>
@@ -369,7 +369,6 @@ if st.session_state.nric and st.session_state.case_number:
     # Check if there's a bank appointment date
     bank_appointment_date = None
     if st.session_state.tax_records is not None:
-        # Get the original dataframe before display formatting
         try:
             df = pd.read_csv("data/tax_records.csv")
             filtered_df = df[(df['NRIC'] == st.session_state.nric) & (df['Case_Number'] == st.session_state.case_number)]
@@ -433,8 +432,7 @@ if st.session_state.tax_records is not None:
 
     # Rename Year_of_Assessment for display
     display_df = display_df.rename(columns={'Year_of_Assessment': 'Year of Assessment'})
-
-    # Display the table
+    
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 else:
     # Check if user has provided NRIC and Case Number but no records found

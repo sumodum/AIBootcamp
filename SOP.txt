@@ -1,0 +1,71 @@
+Bank Appointment Release Process (IRAS)
+
+Purpose:
+To establish a standard procedure for processing and releasing bank appointments initiated by the Inland Revenue Authority of Singapore (IRAS), ensuring compliance with statutory requirements and timely restoration of customer banking services.
+
+Scope:
+This SOP applies to all bank staff responsible for handling IRAS bank appointment notices, customer service teams, and compliance officers involved in reviewing, confirming, and releasing bank account holds related to IRAS enforcement actions.
+
+Definitions:
+Bank Appointment – A legal direction by IRAS to a bank to remit funds from a taxpayer’s account to settle outstanding tax liabilities.
+Release Request – Written or electronic instruction from IRAS indicating that the appointment can be lifted.
+Taxpayer – The individual or business entity subject to the bank appointment.
+
+Process Overview:
+Step 1: Verify Settlement of Tax Liability
+Confirm that the taxpayer’s outstanding tax liabilities, for which the bank appointment was issued, have been fully settled or resolved (e.g. payment received, approved installment plan, or valid objection granted).
+Cross-check relevant tax accounts in IRIN, myTax Portal, or other internal systems to ensure no residual liabilities remain under the same enforcement action.
+Step 2: Confirm Appointment Reference and Bank Details
+Retrieve the corresponding Bank Appointment record from the enforcement database.
+Verify that the bank name, account number, and appointment reference number match the original issue.
+Ensure no duplicate or overlapping bank appointments exist for the same taxpayer. 
+Details required from Taxpayers:
+Identification and Reference Details
+Taxpayer’s full legal name and identification (e.g. NRIC/FIN/UEN)
+IRAS case or appointment reference number (if known)
+Correspondence reference (e.g. from IRAS letter or email)
+Contact information for confirmation (email / phone)
+Bank Account Information
+Name of bank and branch where the appointment was applied
+Last 3 or 4 digits of the affected bank account number (for verification purposes; never request full account number via unsecured channels)
+Confirmation whether the account is personal, joint, or corporate
+Payment / Settlement Evidence
+Payment receipt number or GIRO transaction reference for tax settlement
+Date and amount of payment made to IRAS
+Copy or screenshot of payment confirmation (if available)
+Authorisation or Representation Documents (if applicable)
+Letter of Authorisation (if communication is through a representative, tax agent, or corporate secretary)
+Company’s stamp or official letter (for corporate taxpayers)
+Clarification of Multiple Accounts or Appointments
+Indicate if multiple IRAS appointments were received from different divisions (e.g. Income Tax vs. GST)
+Specify which bank accounts are still under hold, if known
+Step 3: Prepare Release Instruction
+Draft the official Bank Appointment Release Notice, ensuring it includes:
+Taxpayer’s full name and identification (UEN/NRIC/FIN)
+Appointment reference number
+Bank name and branch (if applicable)
+Statement authorising the release of the bank account
+Officer name, designation, and contact details
+IRAS letterhead and official date of issue
+Use the approved release template in accordance with internal enforcement communication standards.
+Step 4: Internal Review and Approval
+Submit the release notice for review and approval by the designated approving officer (e.g. Team Lead or Enforcement Manager).
+Ensure all supporting documentation (proof of payment, account verification logs, etc.) is attached before approval.
+Step 5: Notify the Respective Bank
+Once approval is obtained, send the Bank Appointment Release Notice to the respective bank via the authorised channel:
+Email (official IRAS domain, encrypted if required), or
+Secure electronic transmission system if available.
+Include clear reference to the original appointment and indicate that the bank may proceed to release the affected account(s).
+Ensure the communication is addressed to the correct bank contact point (as per the latest authorised contact list maintained by IRAS).
+Step 6: Record and Update Systems
+Log the release action in the enforcement system, capturing:
+Date and time of release notice issuance
+Bank notified
+Officer name and approval reference
+Update the case status from “Under Appointment” to “Released” in the enforcement case management system.
+Step 7: Notify Taxpayer (if applicable)
+Where required, issue a confirmation notice to the taxpayer informing them that the bank appointment has been released.
+Advise the taxpayer to contact their bank for confirmation of account accessibility.
+Step 8: File and Archive
+Store all related documents — payment proof, internal approval record, and release notice — in the digital case file repository.
+Retain records for the required statutory period in line with IRAS recordkeeping policies.

@@ -1,71 +1,140 @@
-IIT Tax Type Bank Appointment Decision Process
+Updated SOP for Bank Appointment Release Process
 Document Scope and Application
+
 Tax Type: IIT (Individual Income Tax) only
+
 Case Type: Bank appointment cases
+
 Entry Point: Taxpayers transferred after IVR triaging
+
 Process Flow
 Step 1: Taxpayer Verification and Information Disclosure
-Required Verification Checks
-Identity Verification:
-•	Verify taxpayer's full legal name matches enforcement system records exactly
-•	Confirm identification number (NRIC/FIN/UEN) matches system records exactly
-•	Example verification: Taxpayer states name as "Jane Tan" with NRIC "S1234567A" - both details must match system records precisely
-Mandatory Information Disclosure to Taxpayer
-Tax Liability Information:
-•	Inform taxpayer of complete tax liability amount for each Year of Assessment (YA)
-•	Disclose any penalties that have been imposed on their account
-Bank Appointment Details:
-•	Inform taxpayer of the bank appointment date
-•	Inform taxpayer which bank has been appointed for the enforcement action
-•	Specify the exact amount that has been earmarked for bank appointment
-•	Identify which Year of Assessment (YA) the earmarked amount relates to
-•	Disclose any partial funds that have been received to date
-Fund Availability Assessment
-Question to Ask: "Do you currently have the FULL appointment amount available in your account right now?"
-Response Handling:
-•	If taxpayer answers "No" or mentions needing to top up: Transfer call immediately to human officer
-•	If taxpayer answers "Yes" (confirming full funds already available): Proceed with bank confirmation and automated release process
-Bank Confirmation for Automated Release Process
-Bank Verification Question: "Please confirm which bank account contains the full funds for settlement."
-Required Check:
-•	Verify that the bank the taxpayer mentions matches the appointed bank disclosed earlier
-•	If banks do not match, clarify with taxpayer and provide correct bank information
-•	Ensure taxpayer confirms the full appointment amount is available in the correct appointed bank account
-Automated System Release Process
-Upon Confirmation of Full Funds:
-•	BOT accesses system to release the bank appointment with the correct appointed amount
-•	System generates release details automatically
-•	Release details are sent to the appointed bank via email
-•	Inform taxpayer that release has been processed and bank will proceed with fund deduction by next working day
-Decision Points Summary
-1.	Identity verification must pass completely before proceeding
-2.	All tax liability and penalty information must be disclosed
-3.	All bank appointment details must be provided (date, appointed bank, amount, YA, partial payments)
-4.	Only cases with FULL funds already available proceed with automated process
-5.	Any requirement for top-up results in immediate transfer to human officer
-6.	Bank confirmation ensures correct account verification
-7.	Automated system release and email notification to bank
-Key Information Requirements
-•	Complete tax liability per YA
-•	Penalty amounts imposed
-•	Bank appointment date
-•	Appointed bank name
-•	Earmarked appointment amount
-•	Related Year of Assessment
-•	Partial funds received to date
-•	Confirmation of full funds availability (no top-up required)
-•	Bank account verification
-Automated Process Actions
-•	System access to release bank appointment
-•	Generation of release details with appointed amount
-•	Email transmission of release details to appointed bank
-•	Confirmation message to taxpayer regarding processing
-Key Terms
-•	IIT: Individual Income Tax
-•	YA: Year of Assessment
-•	Bank Appointment: Enforcement action with specific date where IRAS earmarks funds from appointed bank
-•	Appointed Bank: The specific bank where enforcement action will take place
-•	Agent Appointment: Enforcement mechanism released upon payment settlement
-•	Partial Funds: Any payments already received towards the total liability
-•	Full Funds: Complete appointment amount already available in account without requiring top-up
+Required Verification Checks:
 
+Identity Verification:
+
+Confirm the taxpayer's NRIC/FIN/UEN: Verify the identity through the NRIC or UEN to ensure that the individual is the correct taxpayer.
+
+Example: The system automatically extracts the NRIC and case number from the user’s input and verifies it against stored records.
+
+Aligning with App: The chatbot automatically extracts and confirms the NRIC and Case Number from the user’s input (via regex extraction).
+
+Mandatory Information Disclosure:
+
+Tax Liability Information: The chatbot provides the taxpayer with their full tax liability amount for each Year of Assessment (YA).
+
+Example: The chatbot responds with the tax details once it retrieves and filters the data from the tax records (based on the NRIC and Case Number).
+
+Bank Appointment Information: The chatbot provides information about the appointed bank and funds earmarked for the appointment.
+
+Aligning with App: After fetching tax records, the chatbot displays the appointed bank, amount, date, and Year of Assessment.
+
+Step 2: Fund Availability Assessment
+
+The chatbot will ask the taxpayer if the full appointment amount is available in their bank account:
+
+Question: "Do you currently have the full appointment amount available in your account?"
+
+If the user answers "No", the chatbot rejects the request and informs the user that they need to contact a human officer to resolve the issue.
+
+If the user answers "Yes", the chatbot will proceed with asking the user for further information such as the bank name and account details.
+
+Aligning with App: The chatbot checks if the user’s bank account and appointment amount match. If not, it will reject the request and inform the user.
+
+Step 3: Bank Appointment Release
+
+Once the full amount is confirmed, the chatbot proceeds to:
+
+Request Bank Account Confirmation:
+
+Question: "Please confirm the bank account that contains the full funds for settlement."
+
+Verification: The system checks if the bank account entered by the user matches the appointed bank. It then checks if the full appointment amount is available.
+
+Aligning with App: The system compares the bank account and funds available and either approves the release or asks for clarification if there is an issue.
+
+System Processes Bank Appointment Release:
+
+If all information is correct and no discrepancies are found, the chatbot initiates the bank appointment release.
+
+The system generates the release details (amount, bank, and appointment date).
+
+An automated email is sent to the bank to notify them of the release.
+
+Aligning with App: The chatbot generates and sends an email to the bank, notifying them of the release. This is done automatically by the backend.
+
+Step 4: Rejection Flow
+
+If any of the conditions required for a bank appointment release are not met (e.g., incomplete information, insufficient funds, missing records), the system will:
+
+Reject the Release:
+
+If the tax records are incomplete or cannot be loaded, the chatbot will inform the user that no matching records could be found.
+
+"⚠️ We could not find matching tax records for the provided NRIC and Case Number."
+
+If payment evidence is not provided or funds are insufficient, the chatbot will reject the request.
+
+"⚠️ The payment evidence or required funds are missing, please provide the necessary details."
+
+Rejection Handling:
+
+Guide the User: The chatbot will provide instructions on what additional information or steps the user must take to proceed.
+
+Example: "Please upload your payment receipt and provide the full bank account details to proceed."
+
+Aligning with App: The app will reject the bank release if the records or payment information are missing and ask the user for the missing details.
+
+No Further Action: If rejection occurs, the chatbot will end the release process and wait for the user’s next action (e.g., further clarification or upload of required documents).
+
+Aligning with App: The app's rejection logic ensures that the process halts when conditions are not met, and the user is prompted to supply the missing data.
+
+Step 5: Email Notification to Bank
+
+After successfully processing the bank release, the system automatically generates an email to notify the appointed bank.
+
+The email will contain details like the taxpayer’s NRIC, Case Number, appointment amount, and the release confirmation.
+
+Aligning with App: The email is generated and sent based on the bank's details retrieved from the user and processed within the chatbot’s conversation flow.
+
+Key Information Requirements:
+
+Tax Liability Details for each Year of Assessment (YA).
+
+Bank Appointment Information (bank name, appointment amount, YA).
+
+Confirmation of Full Funds Availability in the appointed bank account.
+
+Payment Evidence (receipt, payment confirmation).
+
+Bank Account Details for verification (last 4 digits).
+
+Aligning with App: The chatbot ensures these details are either entered by the user or fetched automatically through the system.
+
+Automated Actions:
+
+Release Generation: Once all conditions are confirmed, the release is generated and sent to the bank.
+
+Bank Email Notification: Automatically triggers an email to the appointed bank to notify them of the release.
+
+Final Confirmation to User: After the release has been processed, the chatbot confirms to the user that the bank appointment release has been completed successfully.
+
+Key Terms:
+
+IIT: Individual Income Tax
+
+Bank Appointment: The enforcement action where funds are earmarked from the appointed bank.
+
+Full Funds: Full appointment amount already available in the bank account for the release.
+
+Partial Funds: Any partial payments made that may not meet the required full amount.
+
+Rejection Flow: When the chatbot determines that the required conditions are not met (e.g., insufficient funds, missing information), the process is rejected, and the user is guided to resolve the issue.
+
+Summary of Updates:
+
+Rejection Flow: Clearly defined how and when the chatbot will reject a request based on incomplete or missing information.
+
+Chatbot Interface: Replaced any remaining call-based interactions with chatbot conversation flow for collecting user details and sending notifications.
+
+Bank Appointment Release: Emphasized the automated email process and bank release confirmation that happens after successful processing.

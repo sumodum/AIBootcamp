@@ -23,73 +23,134 @@ Mandatory Information Disclosure:
 
 Tax Liability Information: The chatbot provides the taxpayer with their full tax liability amount for each Year of Assessment (YA).
 
-Example: The chatbot responds with the tax details once it retrieves and filters the data from the tax records (based on the NRIC and Case Number).
-
 Bank Appointment Information: The chatbot provides information about the appointed bank and funds earmarked for the appointment.
 
-Aligning with App: After fetching tax records, the chatbot displays the appointed bank, amount, date, and Year of Assessment.
+Example Disclosure Format:
+"Hello! Thank you for providing your NRIC and case number. I've retrieved your tax information.
+I can see you have a bank appointment with DBS for S$750.00 made on 25 Mar 2025 for YA 2025.
+Your total tax liability for YA 2025 is S$1250.00, and your current outstanding balance is S$0.00.
+
+Would you like to proceed with the bank appointment release process?"
+
+Aligning with App: After fetching tax records, the chatbot immediately discloses the appointed bank, appointment amount, appointment date, Year of Assessment, total tax liability, and current outstanding balance using actual values from the tax records (not placeholders).
 
 Step 2: Fund Availability Assessment
 
-The chatbot will ask the taxpayer if the full appointment amount is available in their bank account:
+The chatbot will ask the taxpayer if the full appointment amount is available in their appointed bank account:
 
-Question: "Do you currently have the full appointment amount available in your account?"
+Question Format (using actual values from tax records):
+"Do you currently have the full appointment amount of S$750.00 available in your DBS account?"
 
-If the user answers "No", the chatbot rejects the request and informs the user that they need to contact a human officer to resolve the issue.
+Note: The chatbot must use the actual Appointment Amount and Appointed Bank name from the tax records, not placeholders.
 
-If the user answers "Yes", the chatbot will proceed with asking the user for further information such as the bank name and account details.
+If the user answers "No", the chatbot rejects the request immediately with this statement:
+"We are unable to proceed with the bank appointment release as the full appointment amount is not available in your account. To explore alternative payment arrangements, please provide your contact number or email. An IRAS officer will contact you within three working days."
 
-Aligning with App: The chatbot checks if the user’s bank account and appointment amount match. If not, it will reject the request and inform the user.
+If the user answers "Yes", the chatbot will proceed to Step 3 (Bank Account Confirmation).
 
-Step 3: Bank Appointment Release
+Aligning with App: The chatbot checks if the user confirms full funds availability. If not, the request is rejected and the user is provided with alternative contact options.
 
-Once the full amount is confirmed, the chatbot proceeds to:
+Step 3: Bank Account Confirmation
 
-Request Bank Account Confirmation:
+Once the user confirms full funds are available, the chatbot proceeds to verify bank account details.
 
-Question: "Please confirm the bank account that contains the full funds for settlement."
+The chatbot asks the following questions SEQUENTIALLY, one at a time:
 
-Verification: The system checks if the bank account entered by the user matches the appointed bank. It then checks if the full appointment amount is available.
+Question 1: "Please confirm the bank account that contains the full funds. Which bank is this account with?"
 
-Aligning with App: The system compares the bank account and funds available and either approves the release or asks for clarification if there is an issue.
+Verification: If the bank name provided does not match the appointed bank, the chatbot asks for clarification.
 
-System Processes Bank Appointment Release:
+Question 2: "Please provide the last 4 digits of your account number for verification."
 
-If all information is correct and no discrepancies are found, the chatbot initiates the bank appointment release.
+Aligning with App: The chatbot asks questions one at a time, acknowledges each response, and verifies that the bank matches the appointed bank before proceeding.
 
-The system generates the release details (amount, bank, and appointment date).
+Step 4: Release Determination and Summary Generation
 
-An automated email is sent to the bank to notify them of the release.
+Once all information is collected, the chatbot determines whether to APPROVE or REJECT the bank appointment release.
 
-Aligning with App: The chatbot generates and sends an email to the bank, notifying them of the release. This is done automatically by the backend.
+Approval Conditions (ALL must be met):
+- Tax liability is fully settled OR full payment is confirmed
+- User confirms full appointment amount is available
+- Bank matches appointed bank
+- All required information has been provided
 
-Step 4: Rejection Flow
+If APPROVED:
+- The chatbot generates a structured summary (see Summary Format below)
+- CRITICAL: The chatbot MUST include the exact text "BANK_APPOINTMENT_RELEASE_APPROVED" in its response (this triggers the automated email notification system)
+- An automated email is sent to the appointed bank to notify them of the release
+- The user is informed that IRAS will notify the bank and the account will be released
 
-If any of the conditions required for a bank appointment release are not met (e.g., incomplete information, insufficient funds, missing records), the system will:
+If REJECTED:
+- The chatbot generates a summary explaining what is missing
+- The chatbot does NOT include "BANK_APPOINTMENT_RELEASE_APPROVED" in its response
+- The user is guided on what additional information or steps are needed
 
-Reject the Release:
+Summary Format:
+The chatbot must always produce this structured summary upon making the decision:
 
-If the tax records are incomplete or cannot be loaded, the chatbot will inform the user that no matching records could be found.
+"Thank you for your cooperation.
+Your request for bank appointment release is [APPROVED/REJECTED]
+REASON: [Explanation]
 
+Let me provide a summary of this case:
+
+CASE DETAILS:
+- NRIC: [NRIC]
+- Case Number: [Case Number]
+- Year of Assessment: [YA]
+
+BANK APPOINTMENT INFORMATION:
+- Appointed Bank: [Bank Name]
+- Appointment Amount: S$[Amount]
+- Appointment Date: [Date]
+
+TAX LIABILITY STATUS:
+- Total Payable: S$[Amount]
+- Total Paid: S$[Amount]
+- Current Balance: S$[Amount]
+
+FUND AVAILABILITY:
+- User confirmed: [YES/NO]
+
+VERIFICATION:
+- Bank Account Confirmed: [Bank Name]
+- Account Details: [Last 4 digits]
+
+[If APPROVED, add this exact line:]
+BANK_APPOINTMENT_RELEASE_APPROVED
+
+[Then add next steps:]
+IRAS will send an official notification to [Bank Name] to release the bank appointment. You will be notified once the process is complete.
+
+[If REJECTED, do NOT add the BANK_APPOINTMENT_RELEASE_APPROVED line. Instead, explain what is missing and what the user needs to do next]"
+
+Aligning with App: The chatbot generates and sends an email to the bank automatically when approved. The user sees the bank appointment release status update to "In Progress" in My Tax Portal.
+
+Step 5: Rejection Scenarios
+
+The chatbot will reject the bank appointment release (with a structured summary) if any of the following conditions occur:
+
+Rejection Conditions:
+- Insufficient funds (user confirms funds are NOT available)
+- Missing required information (e.g., bank account details not provided)
+- Cannot load tax records (no matching NRIC and Case Number found)
+- Bank mismatch (user's bank does not match appointed bank)
+- Outstanding tax balance with no payment confirmation
+
+Rejection Examples:
+
+If no tax records found:
 "⚠️ We could not find matching tax records for the provided NRIC and Case Number."
 
-If payment evidence is not provided or funds are insufficient, the chatbot will reject the request.
+If insufficient funds:
+"We are unable to proceed with the bank appointment release as the full appointment amount is not available in your account. To explore alternative payment arrangements, please provide your contact number or email. An IRAS officer will contact you within three working days."
 
-"⚠️ The payment evidence or required funds are missing, please provide the necessary details."
+If bank mismatch:
+"The bank account you provided does not match the appointed bank. Please confirm the correct bank account details."
 
-Rejection Handling:
+Aligning with App: The app's rejection logic ensures that the process halts when conditions are not met, the user receives a structured summary explaining what is missing, and is guided on next steps.
 
-Guide the User: The chatbot will provide instructions on what additional information or steps the user must take to proceed.
-
-Example: "Please upload your payment receipt and provide the full bank account details to proceed."
-
-Aligning with App: The app will reject the bank release if the records or payment information are missing and ask the user for the missing details.
-
-No Further Action: If rejection occurs, the chatbot will end the release process and wait for the user’s next action (e.g., further clarification or upload of required documents).
-
-Aligning with App: The app's rejection logic ensures that the process halts when conditions are not met, and the user is prompted to supply the missing data.
-
-Step 5: Email Notification to Bank
+Step 6: Email Notification to Bank
 
 After successfully processing the bank release, the system automatically generates an email to notify the appointed bank.
 
@@ -97,19 +158,24 @@ The email will contain details like the taxpayer’s NRIC, Case Number, appointm
 
 Aligning with App: The email is generated and sent based on the bank's details retrieved from the user and processed within the chatbot’s conversation flow.
 
+Conversational Style Requirements:
+
+The chatbot must follow these conversational guidelines:
+- Ask one question at a time (do not list multiple questions in one message)
+- Keep tone professional and friendly
+- Acknowledge each user response before proceeding to the next question
+- Track what information has been provided; do not repeat questions unnecessarily
+- Use actual values from tax records, not placeholders or brackets
+
 Key Information Requirements:
 
-Tax Liability Details for each Year of Assessment (YA).
+The following information is required for the bank appointment release process:
+- Tax Liability Details for each Year of Assessment (YA)
+- Bank Appointment Information (appointed bank name, appointment amount, appointment date, YA)
+- Confirmation of Full Funds Availability in the appointed bank account
+- Bank Account Details for verification (bank name and last 4 digits of account number)
 
-Bank Appointment Information (bank name, appointment amount, YA).
-
-Confirmation of Full Funds Availability in the appointed bank account.
-
-Payment Evidence (receipt, payment confirmation).
-
-Bank Account Details for verification (last 4 digits).
-
-Aligning with App: The chatbot ensures these details are either entered by the user or fetched automatically through the system.
+Aligning with App: The chatbot ensures these details are either entered by the user or fetched automatically through the system. All values displayed to the user come from the tax_records.csv file, not from placeholders.
 
 Automated Actions:
 

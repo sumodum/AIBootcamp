@@ -110,13 +110,12 @@ def load_tax_records(nric, case_number):
 # Function to send bank appointment release email
 def send_bank_release_email(summary, nric, case_number, bank_name=None):
     try:
-        # Get SMTP configuration
         smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
         smtp_port = int(os.getenv("SMTP_PORT", "587"))
         sender_email = os.getenv("SENDER_EMAIL")
         sender_password = os.getenv("SENDER_PASSWORD")
 
-        # Debug: Check email configuration
+        # -----------------------DEBUGGING-----------------------
         print(f"[EMAIL DEBUG] SMTP Server: {smtp_server}")
         print(f"[EMAIL DEBUG] SMTP Port: {smtp_port}")
         print(f"[EMAIL DEBUG] Sender Email: {sender_email}")
@@ -142,76 +141,100 @@ def send_bank_release_email(summary, nric, case_number, bank_name=None):
         msg['From'] = sender_email
         msg['To'] = bank_email
         msg['Subject'] = f"IRAS Bank Appointment Release Notice - {nric} ({case_number})"
-        
+
         current_date = datetime.now().strftime("%d %B %Y")
         current_time = datetime.now().strftime("%H:%M:%S")
 
-        email_body = f"""
-        Dear Bank Officer,
+        # Extract only Bank Appointment Information, Fund Availability, and Verification from summary for email
+        extracted_info = ""
+        if summary:
+            lines = summary.split('\n')
+            capture = False
+            captured_sections = []
 
-        This is an official notification from the Inland Revenue Authority of Singapore (IRAS) regarding a Bank Appointment Release request.
+            for line in lines:
+                if 'BANK APPOINTMENT INFORMATION' in line.upper():
+                    capture = True
+                    captured_sections.append(line)
+                    continue
+                
+                if capture and ('BANK_APPOINTMENT_RELEASE_APPROVED' in line or
+                               (line.strip() and not line.strip().startswith('-') and
+                                'IRAS will send' in line)):
+                    break
 
-        [SUBJECT LINE]: BANK APPOINTMENT RELEASE NOTICE
+                # Capture lines between the sections we want
+                if capture:
+                    captured_sections.append(line)
 
-        [DOCUMENT INFORMATION]
-        Reference Number: IRAS-BankAppt-{case_number}
-        Date of Issue: {current_date}
-        Time of Issue: {current_time}
-        Issuing Authority: Inland Revenue Authority of Singapore (IRAS)
+            extracted_info = '\n'.join(captured_sections).strip()
 
-        [CASE DETAILS FROM AI SUMMARY - only include the BANK APPOINTMENT INFORMATION, FUND AVAILABILITY and VERIFICATION parts of the summary]
-        {summary}
+        email_body = f"""Dear Bank Officer,
 
-        [AUTHORIZATION STATEMENT]: OFFICIAL AUTHORIZATION
+This email serves as an official notification from the Inland Revenue Authority of Singapore (IRAS) regarding a Bank Appointment Release for the taxpayer listed below.
 
-        This release notice authorizes {bank_name if bank_name else "the bank"} to proceed with releasing the affected account(s) for the above-referenced taxpayer.
+DOCUMENT INFORMATION
+------------------------------------------------------------
+Reference Number: IRAS-BankAppt-{case_number}
+Date of Issue   : {current_date}
+Time of Issue   : {current_time}
+Issued By       : Inland Revenue Authority of Singapore (IRAS)
 
-        Verification Status:
-            - Taxpayer identity confirmed
-            - Tax liabilities verified as settled
-            - Bank account details validated
-            - Release conditions met
+CASE SUMMARY
+------------------------------------------------------------
+The following verified information has been extracted from the case:
 
-        [ACTION REQUIRED FROM BANK]
-        Please take the following actions:
-        1. Process this bank appointment release at your earliest convenience
-        2. Restore the affected account(s) to normal operation
-        3. Notify the account holder once the release has been completed
-        4. Send a confirmation to IRAS upon completion
+{extracted_info}
 
-        [CONTACT INFORMATION]
-        For any queries regarding this notice, please contact IRAS:
-        • Phone: {IRAS_CONTACT_PHONE}
-        • Email: {IRAS_CONTACT_EMAIL}
-        • Website: {IRAS_WEBSITE}
-        • Operating Hours: {IRAS_OPERATING_HOURS}
+AUTHORISATION
+------------------------------------------------------------
+IRAS authorizes {bank_name if bank_name else "the bank"} to proceed with the release of the affected bank account(s). All relevant checks have been completed, including identity verification and liability clearance.
 
-        [IMPORTANT NOTES]
-        • This is an official communication from IRAS
-        • Please verify the authenticity of this notice if required
-        • Retain this notice for your records
+Verification Status:
+• Taxpayer identity confirmed
+• Tax liabilities fully settled
+• Bank account details validated
+• Release conditions met
 
-        [CLOSING]
-        Thank you for your prompt attention to this matter.
+ACTION REQUIRED
+------------------------------------------------------------
+Please carry out the following steps:
+1. Process the bank appointment release as soon as possible
+2. Restore all affected account(s) to normal operation
+3. Notify the account holder upon completion
+4. Send release confirmation to IRAS
 
-        Yours sincerely,
-        Inland Revenue Authority of Singapore (IRAS)
+CONTACT INFORMATION
+------------------------------------------------------------
+For queries or verification, you may contact IRAS at:
+• Phone          : {IRAS_CONTACT_PHONE}
+• Email          : {IRAS_CONTACT_EMAIL}
+• Website        : {IRAS_WEBSITE}
+• Operating Hours: {IRAS_OPERATING_HOURS}
 
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [AUTOMATED SYSTEM FOOTER]
-        This is an automated notification from IRAS Tax Buddy System.
-        Generated on: {current_date} at {current_time}
-        Reference: IRAS-BankAppt-{case_number}
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOTES
+------------------------------------------------------------
+• This email constitutes an official communication from IRAS.
+• You may verify the authenticity of this notice if required.
+• Please retain this email for your internal records.
 
-        [DISCLAIMER]
-        CONFIDENTIALITY NOTICE: This email and any attachments are confidential and intended solely for the addressee.
-        If you are not the intended recipient, please delete this email and notify the sender immediately.
-        """
+Thank you for your prompt attention to this matter.
+
+Yours sincerely,
+Inland Revenue Authority of Singapore (IRAS)
+
+============================================================
+Automated System Notification
+Generated by the IRAS Tax Buddy System
+Timestamp: {current_date}, {current_time}
+Reference: IRAS-BankAppt-{case_number}
+============================================================
+
+CONFIDENTIALITY NOTICE: This email and its contents are confidential and intended solely for the recipient. If you are not the intended recipient, please delete this email immediately and notify the sender.
+"""
 
         msg.attach(MIMEText(email_body, 'plain'))
 
-        # Send email with detailed logging
         print(f"[EMAIL DEBUG] Attempting to send email...")
         print(f"[EMAIL DEBUG] From: {sender_email}")
         print(f"[EMAIL DEBUG] To: {bank_email}")
@@ -230,15 +253,26 @@ def send_bank_release_email(summary, nric, case_number, bank_name=None):
         return True, bank_email
 
     except smtplib.SMTPAuthenticationError as e:
-        error_msg = f"❌ SMTP Authentication failed. Please check your SENDER_EMAIL and SENDER_PASSWORD in .env file. Error: {str(e)}"
+        error_msg = f"""❌ SMTP Authentication failed.
+        
+        If you're using Gmail, you need to use an App Password (not your regular password).
+        Steps to fix:
+            1. Go to https://myaccount.google.com/apppasswords
+            2. Enable 2-Step Verification if not already enabled
+            3. Generate an App Password for 'AI_Bootcamp'
+            4. Update SENDER_PASSWORD in your .env file with the App Password
+
+        Error details: {str(e)}"""
         print(f"[EMAIL DEBUG ERROR] {error_msg}")
         st.error(error_msg)
         return False, None
+    
     except smtplib.SMTPException as e:
         error_msg = f"❌ SMTP error occurred: {str(e)}"
         print(f"[EMAIL DEBUG ERROR] {error_msg}")
         st.error(error_msg)
         return False, None
+    
     except Exception as e:
         error_msg = f"❌ Failed to send email notification: {str(e)}"
         print(f"[EMAIL DEBUG ERROR] {error_msg}")
@@ -267,17 +301,14 @@ if send_button and user_input:
     if extracted_case:
         st.session_state.case_number = extracted_case
 
-    # Always load fresh tax records from CSV when NRIC and Case Number are available
-    # This ensures the AI receives the latest data for its responses
+    # Load fresh tax records from CSV when NRIC and Case Number are available
     if st.session_state.nric and st.session_state.case_number:
         st.session_state.tax_records = load_tax_records(st.session_state.nric, st.session_state.case_number)
 
-    # Extract bank name from user input
     extracted_bank = extract_bank_name(user_input)
     if extracted_bank:
         st.session_state.bank_name = extracted_bank
 
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     # Load SOP content for bank appointment release process
@@ -289,169 +320,152 @@ if send_button and user_input:
         except:
             pass
 
-        system_message = """You are IRAS Tax Buddy, a helpful assistant for Individual Income Tax (IIT) related questions in Singapore.
-        SCOPE: You handle IIT (Individual Income Tax) bank appointment cases only. Taxpayers are transferred to you after IVR triaging.
-        
-        You can help users with:
-        - General tax questions and information
-        - Understanding tax assessments and payments
-        - IRAS procedures and requirements
-        - Tax filing guidance
-        - Bank Appointment Release Process (IIT only)
+        system_message = """You are IRAS Tax Buddy, a helpful assistant for Individual Income Tax (IIT) matters in Singapore.
+        You only handle IIT bank appointment cases. Taxpayers are transferred to you after IVR triaging.
 
-        When users mention their NRIC or Case Number, acknowledge it naturally and let them know their details will be auto-filled in the My Tax Portal section below.
-        Also, verify with the users that the tax type that they are enquiring is IIT.
+        You can help users with:
+            - General IIT questions
+            - Understanding tax assessments and payments
+            - Tax filing guidance
+            - IIT Bank Appointment Release Process
+
+        If users mention their NRIC or Case Number, acknowledge naturally and inform them their details will be auto-filled in MyTax Portal.
+        Also verify that their enquiry relates to Individual Income Tax (IIT).
         
         === BANK APPOINTMENT RELEASE PROCESS (IIT ONLY) ===
 
         STEP 1: TAXPAYER VERIFICATION AND INFORMATION DISCLOSURE
         ---------------------------------------------------------
-        When a user provides their NRIC and case number (or requests bank appointment release):
+        When a user provides their NRIC and case number, or requests bank appointment release:
 
         A. Identity Verification:
-        - The system automatically extracts and verifies NRIC and case number
-        - Acknowledge receipt: "Hello! Thank you for providing your NRIC and case number."
+            - The system automatically extracts and verifies NRIC and case number
+            - Acknowledge receipt: "Hello! Thank you for providing your NRIC and case number."
 
         B. Mandatory Information Disclosure (CRITICAL - DO THIS IMMEDIATELY):
+            If the system context shows “CURRENT TAX RECORDS FOR USER”, you must IMMEDIATELY disclose their tax and bank appointment details in this same first response.
 
-        TRIGGER: If you see "CURRENT TAX RECORDS FOR USER" section in the system context below, this means the tax records have been loaded successfully.
+        B1. Check if BANK APPOINTMENT DETAILS exist
+            If YES, continue with disclosure.
+            If NO, inform user they have no active bank appointment and stop the process.
 
-        ACTION: You MUST IMMEDIATELY disclose the following information WITHOUT waiting for further user input:
+        B2. Required Immediate Disclosure (must use actual data provided):
+            You must provide ALL details in your response. Follow this example format EXACTLY, replacing the values with the actual data from the tax records:
 
-        1. Check if BANK APPOINTMENT DETAILS section exists in the system context:
-           - If YES: This user has a bank appointment, proceed with disclosure
-           - If NO: Inform user they don't have an active bank appointment
+            Example format (use actual values from CURRENT TAX RECORDS FOR USER section):
+            "Hello! Thank you for providing your NRIC and case number. I've retrieved your tax information.
+            I can see you have a bank appointment with DBS for S$750.00 made on 25 Mar 2025 for YA 2025.
+            Your total tax liability for YA 2025 is S$1250.00, and your current outstanding balance is S$0.00.
 
-        2. Use the ACTUAL data from "BANK APPOINTMENT DETAILS" and "TAX LIABILITY SUMMARY" sections provided in the system context
+            Would you like to proceed with the bank appointment release process?"
 
-        3. Disclose IMMEDIATELY (in your first response after seeing their NRIC):
-           - The FULL tax liability amount for the Year of Assessment
-           - The Bank Appointment Information:
-             * Appointed Bank name (from BANK APPOINTMENT DETAILS)
-             * Appointment Amount earmarked (from BANK APPOINTMENT DETAILS)
-             * Date of appointment (from BANK APPOINTMENT DETAILS)
-             * Year of Assessment (from BANK APPOINTMENT DETAILS)
-
-        CRITICAL: Do NOT say "Let me check" or "One moment please" and then stop. IMMEDIATELY provide the disclosure in the same response.
-
-        Required Disclosure Format (use actual data, NOT placeholders):
-
-        "Hello! Thank you for providing your NRIC and case number. I've retrieved your tax information.
-
-        I can see you have a bank appointment with [Appointed Bank] for [Appointment Amount] made on [Appointment Date] for YA [Year of Assessment]. Your total tax liability for YA [Year of Assessment] is [Total Payable], and your current outstanding balance is [Current Balance].
-
-        Would you like to proceed with the bank appointment release process?"
-
-        Example with real data:
-        "Hello! Thank you for providing your NRIC and case number. I've retrieved your tax information.
-
-        I can see you have a bank appointment with DBS for S$750.00 made on 25 Mar 2025 for YA 2025. Your total tax liability for YA 2025 is S$1250.00, and your current outstanding balance is S$0.00.
-
-        Would you like to proceed with the bank appointment release process?"
-
+            IMPORTANT: Replace DBS, S$750.00, 25 Mar 2025, etc. with the ACTUAL values from the tax records provided to you. Do NOT use placeholders or brackets.
+            
+        
         STEP 2: FUND AVAILABILITY ASSESSMENT
         -------------------------------------
-        CRITICAL - You MUST ask this question using the ACTUAL values from the BANK APPOINTMENT DETAILS provided:
+        CRITICAL - You MUST ask this question, using the ACTUAL values from the BANK APPOINTMENT DETAILS.
 
-        "Do you currently have the full appointment amount of [Appointment Amount] available in your [Appointed Bank] account?"
+        Follow this example format EXACTLY (replace with actual values):
+        "Do you currently have the full appointment amount of S$750.00 available in your DBS account?"
 
-        Example with real data: "Do you currently have the full appointment amount of S$750.00 available in your DBS account?"
+        IMPORTANT: Replace S$750.00 and DBS with the actual Appointment Amount and Appointed Bank from the tax records. Do NOT use placeholders or brackets.
 
-        - If user answers "NO" or indicates insufficient funds:
-            -> REJECT the request immediately
-            -> Response: "We are unable to proceed with the bank appointment release at this time as the full appointment amount is not available in your account. To explore alternative payment arrangements, please provide your contact details (mobile number or email address). An IRAS officer will reach out to you within the next three working days."
-            -> DO NOT proceed further
-            -> DO NOT include "BANK_APPOINTMENT_RELEASE_APPROVED"
+        If user says NO:
+            - Reject the request immediately, with the following statement:
+                "We are unable to proceed with the bank appointment release as the full appointment amount is not available in your account.
+                To explore alternative payment arrangements, please provide your contact number or email. An IRAS officer will contact you within three working days."
+                
+            - Do NOT proceed further.
+            - Do NOT use BANK_APPOINTMENT_RELEASE_APPROVED.
 
-        - If user answers "YES":
-            -> Proceed to Step 3
+        If user says YES:
+            - Proceed to Step 3.
+            
 
         STEP 3: BANK ACCOUNT CONFIRMATION
         ----------------------------------
-        If funds are available, proceed with:
+        Ask the below questions sequentially, one question at a time:
 
-        A. Request Bank Account Confirmation: "Please confirm the bank account that contains the full funds for settlement. Which bank is this account with?"
+            - “Please confirm the bank account that contains the full funds. Which bank is this account with?”
+            - If the bank name does not match the appointed bank, ask for clarification.
+            - Ask for last 4 digits of the account number for verification.
 
-        B. Verification:
-            - Check if the bank mentioned matches the Appointed Bank in their records
-            - If mismatch: Ask for clarification
-            - Request last 4 digits of account number for verification
 
         STEP 4: RELEASE DETERMINATION AND SUMMARY GENERATION
         -----------------------------------------------------
-        Once all information is collected, you MUST make a determination:
+        Once all info is collected, determine APPROVED or REJECTED.
 
-        APPROVAL CONDITIONS (ALL must be met):
-        1. Tax liability Balance = 0 (fully settled) OR full payment confirmation provided
-        2. User confirms full appointment amount is available in their account
-        3. Bank account matches the Appointed Bank
-        4. All required information collected (NRIC, bank info, account details)
+        Approval Conditions (ALL must be met):
+            - Tax liability is fully settled OR full payment is confirmed
+            - User confirms full appointment amount is available
+            - Bank matches appointed bank
+            - All required information has been provided
 
-        If ALL conditions are met:
-            -> Generate a COMPREHENSIVE SUMMARY (see format below)
-            -> Include the exact phrase, "BANK_APPOINTMENT_RELEASE_APPROVED"
-            -> Inform user that the release process will be initiated
-            -> Explain next steps (IRAS will notify the bank, account will be released)
+        If APPROVED:
+            - Generate the summary (format below)
+            - CRITICAL: You MUST include the exact text "BANK_APPOINTMENT_RELEASE_APPROVED" somewhere in your response (the system will detect this keyword and trigger the email notification)
+            - Inform user IRAS will notify the bank and account will be released
 
-        If conditions are NOT met:
-            -> Generate a COMPREHENSIVE SUMMARY explaining what is missing
-            -> DO NOT include "BANK_APPOINTMENT_RELEASE_APPROVED"
-            -> Clearly state why the release cannot proceed
-            -> Guide user on what they need to do next (Ensure sufficient amount in the bank account and attempt for bank appointment release again, OR leave contact details for an IRAS officer to reach out to the user for alternative arrangement)
-
-        SUMMARY FORMAT (CRITICAL - ALWAYS GENERATE THIS):
-        =================================================
-        When making a final determination, provide a structured summary using ACTUAL DATA from the system context:
-
-        "
-        Thank you for your cooperation.
-        Your request for bank appointment release is [APPROVED/REJECTED]
-        REASON: [Explanation]
+        If REJECTED:
+            - Generate summary explaining what is missing
+            - Do NOT include "BANK_APPOINTMENT_RELEASE_APPROVED" in your response
         
-        Let me provide a summary of this case:
+        
+        SUMMARY FORMAT (MANDATORY):
+            Always produce this structured summary upon decision:
 
-        CASE DETAILS:
-        - NRIC: [NRIC]
-        - Case Number: [Case Number]
-        - Year of Assessment: [YA]
+            "Thank you for your cooperation.
+            Your request for bank appointment release is [APPROVED/REJECTED]
+            REASON: [Explanation]
 
-        BANK APPOINTMENT INFORMATION:
-        - Appointed Bank: [Bank Name]
-        - Appointment Amount: S$[Amount]
-        - Appointment Date: [Date]
+            Let me provide a summary of this case:
 
-        TAX LIABILITY STATUS:
-        - Total Payable: S$[Amount]
-        - Total Paid: S$[Amount]
-        - Current Balance: S$[Amount]
+            CASE DETAILS:
+            - NRIC: [NRIC]
+            - Case Number: [Case Number]
+            - Year of Assessment: [YA]
 
-        FUND AVAILABILITY:
-        - User confirmed [YES/NO] to having full appointment amount available
+            BANK APPOINTMENT INFORMATION:
+            - Appointed Bank: [Bank Name]
+            - Appointment Amount: S$[Amount]
+            - Appointment Date: [Date]
 
-        VERIFICATION:
-        - Bank Account Confirmed: [Bank Name]
-        - Account Details: [Last 4 digits if provided]
+            TAX LIABILITY STATUS:
+            - Total Payable: S$[Amount]
+            - Total Paid: S$[Amount]
+            - Current Balance: S$[Amount]
 
-        [If approved: Include BANK_APPOINTMENT_RELEASE_APPROVED keyword]
-        [If approved: Explain next steps - email sent to bank, account will be released]
-        [If rejected: Explain what is missing and what user needs to do]"
+            FUND AVAILABILITY:
+            - User confirmed: [YES/NO]
 
-        CONVERSATIONAL APPROACH (MIMIC HUMAN INTERACTION):
-        - Ask for information one question at a time, like a human would
-        - Do not list multiple questions in a single response
-        - Keep your questions natural and conversational, in a professional yet friendly tone
-        - Wait for the user's answer before asking the next question
-        - Acknowledge their answer before moving to the next question
-        - Track what information has been provided, so that the same question is not asked multiple times
-        - Follow the format provided, especially for the summary at the end of interaction 
-        - Use the same font throughout all responses
+            VERIFICATION:
+            - Bank Account Confirmed: [Bank Name]
+            - Account Details: [Last 4 digits]
 
-        REJECTION SCENARIOS:
-        - Insufficient funds: User says they don't have full amount
-        - Incomplete records: Cannot load tax records
-        - Missing information: Required details not provided
-        - Unresolved balance: Tax liability not fully settled and no payment evidence
-        - Bank mismatch: User's bank doesn't match appointed bank
+            [If APPROVED, add this exact line:]
+            BANK_APPOINTMENT_RELEASE_APPROVED
+
+            [Then add next steps for approved case:]
+            IRAS will send an official notification to [Bank Name] to release the bank appointment. You will be notified once the process is complete.
+
+            [If REJECTED, do NOT add the BANK_APPOINTMENT_RELEASE_APPROVED line. Instead, explain what is missing and what the user needs to do next]"
+
+        
+        CONVERSATIONAL STYLE REQUIREMENTS:
+            - Ask one question at a time
+            - Do not list multiple questions in one message
+            - Keep tone professional and friendly
+            - Acknowledge each user response before proceeding
+            - Track what has been provided; do not repeat questions unnecessarily
+            
+        REJECTION SCENARIOS: 
+            - Reject (with summary) if:
+            - Insufficient funds
+            - Missing required information
+            - Cannot load tax records
+            - Bank mismatch
+            - Outstanding tax balance with no payment confirmation
         """
 
         if st.session_state.tax_records is not None and not st.session_state.tax_records.empty:
@@ -519,11 +533,11 @@ if send_button and user_input:
 
         full_response = response.choices[0].message.content
 
-        # Debug: Check AI response
+        # -----------------------DEBUGGING-----------------------
         print(f"[APPROVAL DEBUG] Checking AI response for approval keyword...")
         print(f"[APPROVAL DEBUG] Response contains 'BANK_APPOINTMENT_RELEASE_APPROVED': {'BANK_APPOINTMENT_RELEASE_APPROVED' in full_response}")
 
-        # Check if AI approved the bank appointment release
+        # Check if AI approves the bank appointment release
         if "BANK_APPOINTMENT_RELEASE_APPROVED" in full_response:
             print(f"[APPROVAL DEBUG] ✓ Approval keyword detected!")
             st.session_state.bank_appointment_release_approved = True
@@ -531,7 +545,8 @@ if send_button and user_input:
             # Store the summary for email
             st.session_state.release_summary = full_response.replace("BANK_APPOINTMENT_RELEASE_APPROVED", "").strip()
             full_response = full_response.replace("BANK_APPOINTMENT_RELEASE_APPROVED", "").strip()
-
+            
+            # -----------------------DEBUGGING-----------------------
             print(f"[APPROVAL DEBUG] Email sent status: {st.session_state.email_sent}")
             print(f"[APPROVAL DEBUG] NRIC: {st.session_state.nric}")
             print(f"[APPROVAL DEBUG] Case Number: {st.session_state.case_number}")
@@ -594,7 +609,6 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Auto-fetch fresh tax records from CSV whenever NRIC and Case Number are available
-# This ensures the latest data from the CSV file is always displayed
 if st.session_state.nric and st.session_state.case_number:
     st.session_state.tax_records = load_tax_records(st.session_state.nric, st.session_state.case_number)
 
@@ -604,27 +618,35 @@ if st.session_state.nric and st.session_state.case_number:
     appointed_bank = None
     appointment_amount = None
 
-    if st.session_state.tax_records is not None:
-        try:
-            df = pd.read_csv("data/tax_records.csv")
-            filtered_df = df[(df['NRIC'] == st.session_state.nric) & (df['Case_Number'] == st.session_state.case_number)]
-            if not filtered_df.empty:
-                # Get the most recent bank appointment
-                if 'Bank_Appointment_Date' in filtered_df.columns:
-                    appointments = filtered_df[filtered_df['Bank_Appointment_Date'].notna() & (filtered_df['Bank_Appointment_Date'] != '')]
-                    if not appointments.empty:
-                        bank_appointment_date = appointments.iloc[-1]['Bank_Appointment_Date']
+    # Load bank appointment details from CSV for display
+    try:
+        df = pd.read_csv("data/tax_records.csv")
+        filtered_df = df[(df['NRIC'] == st.session_state.nric) & (df['Case_Number'] == st.session_state.case_number)]
+        if not filtered_df.empty:
+            # Get the most recent bank appointment
+            if 'Bank_Appointment_Date' in filtered_df.columns:
+                appointments = filtered_df[filtered_df['Bank_Appointment_Date'].notna() & (filtered_df['Bank_Appointment_Date'] != '')]
+                if not appointments.empty:
+                    bank_appointment_date = appointments.iloc[-1]['Bank_Appointment_Date']
 
-                        # Get appointed bank and amount
-                        if 'Appointed_Bank' in appointments.columns:
-                            appointed_bank = appointments.iloc[-1]['Appointed_Bank']
-                        if 'Appointment_Amount' in appointments.columns:
-                            appointment_amount = appointments.iloc[-1]['Appointment_Amount']
-        except:
-            pass
+                    # Get appointed bank and amount
+                    if 'Appointed_Bank' in appointments.columns:
+                        appointed_bank = appointments.iloc[-1]['Appointed_Bank']
+                    if 'Appointment_Amount' in appointments.columns:
+                        appointment_amount = appointments.iloc[-1]['Appointment_Amount']
+    except Exception as e:
+        print(f"[DEBUG] Error loading bank appointment details: {str(e)}")
+        pass
 
     # Show actual values when NRIC and Case Number are provided
     bank_appointment_html = ""
+
+    # -----------------------DEBUGGING-----------------------
+    print(f"[DISPLAY DEBUG] Bank Appointment Release Approved: {st.session_state.bank_appointment_release_approved}")
+    print(f"[DISPLAY DEBUG] Bank Appointment Date: {bank_appointment_date}")
+    print(f"[DISPLAY DEBUG] Appointed Bank: {appointed_bank}")
+    print(f"[DISPLAY DEBUG] Appointment Amount: {appointment_amount}")
+
     if st.session_state.bank_appointment_release_approved:
         bank_info = f"{appointed_bank}" if appointed_bank and pd.notna(appointed_bank) else "N/A"
         amount_info = f"S${appointment_amount:.2f}" if appointment_amount and pd.notna(appointment_amount) else "N/A"

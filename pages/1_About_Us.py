@@ -2,7 +2,7 @@ import streamlit as st
 
 # Page configuration
 st.set_page_config(
-    page_title="About Us - AI Bootcamp",
+    page_title="About Us - IRAS Tax Officer Assistant",
     page_icon="👥",
     layout="wide"
 )
@@ -12,81 +12,100 @@ st.title("👥 About Us")
 
 # Introduction
 st.markdown("""
-## Welcome to AI Bootcamp
+## Welcome to the IRAS Enforcement Officer Virtual Assistant
 
-AI Bootcamp is dedicated to making artificial intelligence accessible and understandable
-to everyone. Our mission is to provide cutting-edge AI tools and educational resources
-that empower individuals and organizations to harness the power of AI technology.
+This project was developed as part of the **AI Bootcamp**, with the goal of building  
+a practical, workflow-enhancing AI system that simulates how IRAS enforcement tax officers  
+interact with taxpayers through structured conversation, SOP-driven guidance,  
+and automated processes.
+
+The app combines:
+- AI-driven conversation flows  
+- Email automation  
+- Tax record lookup  
+- MyTax Portal navigation guidance  
+- Bank appointment SOP flows  
+
+All within a single guided interface designed to mimic a CRM environment.
 """)
 
 # Mission & Vision
 col1, col2 = st.columns(2)
 
 with col1:
-    st.header("🎯 Our Mission")
+    st.header("🎯 Project Mission")
     st.markdown("""
-    To democratize access to AI technology by providing intuitive, powerful tools
-    that anyone can use, regardless of their technical background.
-
-    We believe that AI should be:
-    - **Accessible** - Easy to use for everyone
-    - **Transparent** - Clear about how it works
-    - **Helpful** - Solving real-world problems
-    - **Ethical** - Used responsibly and fairly
+    To create an AI-powered tool that:
+    - Assists IRAS enforcement officers in responding to taxpayer queries  
+    - Automates SOP-driven tasks (e.g., bank appointment process)  
+    - Improves accuracy by referencing real working instructions  
+    - Reduces officer load by automating email drafting & information retrieval  
     """)
 
 with col2:
-    st.header("🔭 Our Vision")
+    st.header("🔭 Project Scope & Vision")
     st.markdown("""
-    To create a world where AI technology enhances human capabilities and creativity,
-    helping people work smarter, learn faster, and achieve more.
+    This project focuses on simulating **real IRAS workflows**, including:
 
-    We envision a future where:
-    - AI assists in everyday tasks
-    - Learning is personalized and effective
-    - Innovation is accelerated
-    - Human potential is amplified
+    - Loading structured taxpayer data  
+    - Searching tax records by NRIC  
+    - Handling case ID extraction from natural text  
+    - Executing multi-step SOP dialogs for bank appointments  
+    - Drafting emails to banks based on predefined formats  
+    - Showing relevant IRAS information succinctly  
+
+    The long-term vision is to show how AI can assist public service officers  
+    while remaining compliant, structured, and safe.
     """)
 
 # What We Offer
-st.header("💡 What We Offer")
+st.header("💡 Features Implemented")
 
 st.markdown("""
-### AI-Powered Chatbot
-Our flagship feature is an intelligent chatbot powered by OpenAI's GPT-3.5 Turbo,
-providing you with:
-- Instant answers to your questions
-- Creative problem-solving assistance
-- Learning support across various topics
-- Professional writing and editing help
-- And much more!
+### 🧠 AI-Powered Chat Layer
+- Structured system prompt based on IRAS SOPs  
+- Strict persona and rule enforcement  
+- Multi-step guided flows (e.g., bank appointments)  
+- Automatic detection of NRIC → loads tax records  
+- Case number extraction logic  
+- No hallucination enforced through system message constraints  
 
-### Educational Resources
-We're committed to helping you understand AI technology through:
-- Clear explanations of how our tools work
-- Best practices for AI interaction
-- Tips for getting the most out of AI assistants
-- Transparent methodology and limitations
+### 📨 Email Automation
+- Auto-generated email drafts to banks  
+- Send via SMTP through preset credentials  
+- Predefined mappings for bank names → email addresses  
+
+### 📁 Data Handling
+- CSV lookup for taxpayer records  
+- Session state for conversation memory  
+- PDF/website links for MyTax Portal instructions  
+
+### 🖥️ Streamlit Interface
+- Custom layout for a chatbot window  
+- Conversation history tracking  
+- Tool functions that AI can call to:  
+  - get_tax_data  
+  - get_case_details  
+  - send_email  
+  - open_mytax_portal  
 """)
 
-# Team Section (placeholder)
-st.header("👨‍👩‍👧‍👦 Our Team")
+# Team Section
+st.header("👨‍👩‍👧‍👦 The Team")
 st.markdown("""
-AI Bootcamp is built by a passionate team dedicated to making AI technology
-accessible and beneficial for all.
+This project was created IRAS enforcement officers, dedicated to demonstrating  
+how AI can enhance operational processes within government agencies.
 
-*[Team information can be customized here]*
+*(Lee Sumi, Eugene Wong, He Jinming)*
 """)
 
 # Contact
-st.header("📧 Get in Touch")
+st.header("📧 Contact")
 st.markdown("""
-We'd love to hear from you! Whether you have questions, feedback, or just want
-to say hello, feel free to reach out.
-
-*[Contact information can be added here]*
+If you have questions or would like to learn more about this project, feel free  
+to reach out to the AI Bootcamp instructors or your project team lead.
 """)
 
 # Footer
 st.markdown("---")
-st.markdown("Built with ❤️ using Streamlit & OpenAI")
+st.markdown("Built with ❤️ using Streamlit & OpenAI • IRAS Tax Officer Simulation Project")

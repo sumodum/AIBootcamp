@@ -2,7 +2,7 @@ import streamlit as st
 
 # Page configuration
 st.set_page_config(
-    page_title="Methodology - AI Bootcamp",
+    page_title="Methodology - IRAS Enforcement Officer Assistant",
     page_icon="🔬",
     layout="wide"
 )
@@ -12,11 +12,17 @@ st.title("🔬 Methodology")
 
 # Introduction
 st.markdown("""
-## How Our AI Chatbot Works
+## Understanding the System Architecture & Use Cases
 
-Understanding the technology behind our chatbot helps you get the most out of it.
-This page explains our approach, the technology we use, and best practices for
-interaction.
+This section explains **how the IRAS Enforcement Officer Virtual Assistant works**,  
+including:
+
+- The **technology stack** used  
+- The **data processing flow**  
+- The **two main use cases** of the application  
+- A **flowchart** illustrating all processes (flowchart.png)  
+
+This methodology is based directly on the implemented code and functions.
 """)
 
 # Technology Overview
@@ -25,149 +31,140 @@ st.header("🤖 Technology Stack")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("OpenAI GPT-3.5 Turbo")
+    st.subheader("OpenAI GPT Models")
     st.markdown("""
-    Our chatbot is powered by OpenAI's GPT-3.5 Turbo, a state-of-the-art
-    large language model that:
-
-    - Understands and generates human-like text
-    - Has been trained on diverse internet text
-    - Can handle a wide variety of tasks
-    - Responds in real-time with streaming output
+    The assistant uses OpenAI’s GPT-based models for:
+    - Natural language understanding  
+    - Extracting NRIC and Case IDs  
+    - Following IRAS Standard Operating Procedures  
+    - Deciding when to call tools (function-calling)  
+    - Drafting email content  
     """)
 
 with col2:
     st.subheader("Streamlit Framework")
     st.markdown("""
-    The user interface is built with Streamlit, which provides:
-
-    - Clean, intuitive design
-    - Real-time interaction
-    - Responsive layout
-    - Session state management for conversation history
+    Streamlit handles:
+    - User interface (chat window)  
+    - Multi-page navigation  
+    - Session state for conversation & retrieved data  
+    - Rendering of tax data and email previews  
     """)
 
-# How It Works
-st.header("⚙️ How It Works")
+# Use Case 1
+st.header("📌 Use Case 1: AI Chatbot for Tax Queries & Record Retrieval")
 
 st.markdown("""
-### The Process Flow
+This is the primary feature of the application. The AI simulates an **IRAS tax officer**  
+who can:
 
-1. **You Ask a Question**
-   - You type your question or prompt in the chat input
-   - The message is sent to our system
+1. Respond to general questions  
+2. Follow strict IRAS SOP through a long system instruction  
+3. Detect taxpayer NRIC and load tax data  
+4. Extract Case IDs from casual text  
+5. Conduct multi-step workflows such as **Bank Appointment Booking SOP**  
+6. Guide the user to MyTax Portal when needed  
 
-2. **Context Assembly**
-   - Your current message is combined with previous conversation history
-   - This provides context for more coherent responses
+### 🔍 Functions Involved in Use Case 1
 
-3. **AI Processing**
-   - The conversation is sent to OpenAI's GPT-3.5 Turbo model
-   - The AI analyzes the context and generates a response
-   - Temperature setting (0.7) balances creativity and consistency
+| Function Name | Purpose |
+|---------------|---------|
+| **get_tax_data(nric)** | Retrieves taxpayer data from the CSV file |
+| **get_case_details(case_id)** | Gets details about the user's case |
+| **open_mytax_portal()** | Provides step-by-step instructions to log in to MyTax Portal |
+| **bank_appointment_flow()** | Multi-step IRAS workflow for bank appointments |
 
-4. **Streaming Response**
-   - The response is streamed back in real-time
-   - You see the answer appear word by word
-   - The full response is saved to conversation history
+### 🧠 Process Flow for Use Case 1
 
-5. **Continuous Conversation**
-   - Each exchange builds on previous messages
-   - The chatbot maintains context throughout the session
-   - You can ask follow-up questions naturally
+1. **User sends a message**  
+2. System checks message for:
+   - NRIC  
+   - Case ID  
+   - Keywords indicating SOP workflow  
+3. System creates full AI prompt including:
+   - IRAS SOP  
+   - Conversation history  
+   - Function definitions  
+4. AI responds OR calls a tool:
+   - If NRIC → call `get_tax_data()`  
+   - If case number → call `get_case_details()`  
+   - If bank appointment → start SOP workflow  
+5. Tool returns data → AI interprets it → AI replies to user  
+6. Chat continues with updated context stored in session state  
+
+This flow ensures the assistant behaves like a structured, rule-based IRAS officer.
 """)
 
-# Configuration
-st.header("🔧 Configuration & Parameters")
+# Use Case 2
+st.header("📧 Use Case 2: Automated Email Drafting & Sending")
 
 st.markdown("""
-### Model Settings
+The second major function of the system is **email automation**.
 
-Our chatbot uses the following configuration:
+This feature activates during certain workflows, particularly the  
+**Bank Appointment SOP**, where an IRAS officer must email a bank  
+(e.g., UOB, DBS, OCBC, HSBC).
 
-| Parameter | Value | Purpose |
-|-----------|-------|---------|
-| **Model** | gpt-3.5-turbo | The AI model powering responses |
-| **Temperature** | 0.7 | Balances creativity (higher) vs consistency (lower) |
-| **Max Tokens** | 1000 | Maximum length of each response |
-| **Streaming** | Enabled | Real-time response display |
+### 🔓 Trigger Conditions
+Email preparation begins when:
+- The user reaches the final step of the bank appointment SOP  
+- The AI determines that a bank contact email is required  
 
-### What This Means
+### ✉️ Functions Involved in Use Case 2
 
-- **Temperature (0.7)**: Provides a good balance between creative, varied responses
-  and consistent, focused answers
-- **Max Tokens (1000)**: Allows detailed responses while maintaining reasonable
-  response times
-- **Streaming**: You see responses as they're generated, not all at once
+| Function Name | Purpose |
+|---------------|---------|
+| **send_email(to, subject, message, sender, password)** | Sends email via SMTP |
+| **AI-generated email content** | The assistant drafts the text before sending |
+| **BANK_EMAILS mapping** | Automatically determines the correct bank mailbox |
+
+### 📬 Process Flow for Use Case 2
+
+1. AI gathers required information from the user:
+   - Bank name  
+   - Reason for appointment  
+   - Case number or tax reference  
+2. AI generates email content using the system prompt  
+3. System displays:
+   - Email preview  
+   - Recipient address  
+4. User confirms sending  
+5. SMTP function `send_email()` is executed with:
+   - Gmail SMTP server  
+   - Environment-stored credentials  
+   - Auto-mapped bank mailbox  
+6. Confirmation is returned to the user  
 """)
 
-# Best Practices
-st.header("💡 Best Practices")
+# Flowchart
+st.header("🧩 System Flowcharts")
 
 st.markdown("""
-### Getting the Best Results
+The full workflow for both use cases is illustrated in the flowchart below.
 
-To get the most helpful responses from our chatbot:
-
-#### ✅ Do:
-- **Be specific** - Clearly state what you need
-- **Provide context** - Include relevant background information
-- **Ask follow-ups** - Build on previous responses
-- **Break down complex questions** - Ask step by step if needed
-- **Experiment** - Try rephrasing if you don't get what you need
-
-#### ❌ Avoid:
-- **Vague questions** - "Tell me about stuff" is too broad
-- **Expecting real-time data** - The model's knowledge has a cutoff date
-- **Very long prompts** - Keep questions focused and manageable
-- **Assuming context between sessions** - Each session starts fresh
+The file **flowchart.png** has been added to the GitHub repository and is displayed here:
 """)
 
-# Limitations
-st.header("⚠️ Limitations & Considerations")
+st.image("flowchart.png", caption="Process flow of both use cases", use_column_width=True)
+
+# Data Handling
+st.header("🔄 Data Flow Summary")
 
 st.markdown("""
-### What to Keep in Mind
+### Data Sources
+- **tax_records.csv** — contains taxpayer details  
+- **.env** — stores API keys, email passwords, bank email mappings  
+- **System Prompt** — defines IRAS officer behavior and SOP  
 
-While our chatbot is powerful, it has some limitations:
-
-1. **Knowledge Cutoff**
-   - The model was trained on data up to a specific date
-   - It doesn't have real-time information or current events
-
-2. **Not a Search Engine**
-   - It generates responses based on patterns in training data
-   - It may not always provide the most up-to-date information
-
-3. **Context Window**
-   - There's a limit to how much conversation history is maintained
-   - Very long conversations may lose early context
-
-4. **Accuracy**
-   - While generally reliable, the AI can make mistakes
-   - Always verify critical information from authoritative sources
-
-5. **No Memory Between Sessions**
-   - Each new session starts fresh
-   - Previous conversations are not remembered
-   - Use "Clear Chat History" to start a new conversation in the same session
-""")
-
-# Privacy & Data
-st.header("🔒 Privacy & Data Handling")
-
-st.markdown("""
-### Your Data
-
-- **Session-based**: Conversations are stored only in your browser session
-- **Not persistent**: Chat history is cleared when you refresh or close the page
-- **API Calls**: Messages are sent to OpenAI's API for processing
-- **No Storage**: We don't store your conversations on our servers
-
-For more information about OpenAI's data handling, please visit
-[OpenAI's Privacy Policy](https://openai.com/policies/privacy-policy).
+### Internal Data Flow
+1. User input →  
+2. NRIC/Case detection →  
+3. Data retrieval via tools →  
+4. AI reasoning + response streaming →  
+5. Optional email sending →  
+6. Display to user via Streamlit  
 """)
 
 # Footer
 st.markdown("---")
-st.markdown("Built with ❤️ using Streamlit & OpenAI")
+st.markdown("Built with ❤️ using Streamlit & OpenAI •")

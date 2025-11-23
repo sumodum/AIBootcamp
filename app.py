@@ -34,6 +34,43 @@ st.set_page_config(
     layout="wide"
 )
 
+# Password Protection
+def check_password():
+    """Returns True if the user has entered the correct password."""
+
+    def password_entered():
+        if st.session_state["password"] == os.getenv("APP_PASSWORD", "admin123"):
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
+            
+    if st.session_state.get("password_correct", False):
+        return True
+
+    # Show login form
+    st.markdown("""
+        <div style="background-color: #2D7BB9; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">🤖 IRAS Tax Buddy</h1>
+            <p style="color: white; margin: 10px 0 0 0;">Please enter the password to access the application</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.text_input(
+        "Password",
+        type="password",
+        on_change=password_entered,
+        key="password"
+    )
+
+    if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+        st.error("😕 Password incorrect")
+
+    return False
+
+if not check_password():
+    st.stop()
+
 st.markdown("""
     <div style="background-color: #2D7BB9; padding: 10px; border-radius: 10px; margin-bottom: 10px;">
         <h2 style="color: white; margin: 0;">🤖 IRAS Tax Buddy</h2>
@@ -58,7 +95,7 @@ if "bank_appointment_info" not in st.session_state:
         "identification": {},
         "bank_account": {},
         "payment_evidence": {},
-        "authorization": {},
+        "authorisation": {},
         "multiple_accounts": {}
     }
 if "bank_appointment_release_approved" not in st.session_state:
@@ -188,7 +225,7 @@ The following verified information has been extracted from the case:
 
 AUTHORISATION
 ------------------------------------------------------------
-IRAS authorizes {bank_name if bank_name else "the bank"} to proceed with the release of the affected bank account(s). All relevant checks have been completed, including identity verification and liability clearance.
+IRAS authorises {bank_name if bank_name else "the bank"} to proceed with the release of the affected bank account(s). All relevant checks have been completed, including identity verification and liability clearance.
 
 Verification Status:
 • Taxpayer identity confirmed
@@ -741,7 +778,7 @@ with st.sidebar:
             "identification": {},
             "bank_account": {},
             "payment_evidence": {},
-            "authorization": {},
+            "authorisation": {},
             "multiple_accounts": {}
         }
         st.session_state.bank_appointment_release_approved = False

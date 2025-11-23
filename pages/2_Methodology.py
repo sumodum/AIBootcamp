@@ -1,8 +1,9 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 # Page configuration
 st.set_page_config(
-    page_title="Methodology - IRAS Enforcement Officer Assistant",
+    page_title="Methodology - IRAS Tax Buddy",
     page_icon="🔬",
     layout="wide"
 )
@@ -14,13 +15,11 @@ st.title("🔬 Methodology")
 st.markdown("""
 ## Understanding the System Architecture & Use Cases
 
-This section explains **how the IRAS Enforcement Officer Virtual Assistant works**,  
-including:
-
-- The **technology stack** used  
-- The **data processing flow**  
-- The **two main use cases** of the application  
-- A **flowchart** illustrating all processes (flowchart.png)  
+This section explains **how the IRAS Tax Buddy works**, including:
+- The **technology stack** used
+- The **data processing flow**
+- The **two main use cases** with detailed flowcharts
+- **Implementation details** for each use case
 
 This methodology is based directly on the implemented code and functions.
 """)
@@ -31,140 +30,397 @@ st.header("🤖 Technology Stack")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("OpenAI GPT Models")
+    st.subheader("OpenAI GPT-3.5 Turbo")
     st.markdown("""
-    The assistant uses OpenAI’s GPT-based models for:
-    - Natural language understanding  
-    - Extracting NRIC and Case IDs  
-    - Following IRAS Standard Operating Procedures  
-    - Deciding when to call tools (function-calling)  
-    - Drafting email content  
+    The assistant uses OpenAI's GPT-3.5 Turbo for:
+    - Natural language understanding
+    - Extracting NRIC and Case Numbers via regex
+    - Following IRAS Standard Operating Procedures (SOP)
+    - Making approval/rejection decisions
+    - Generating structured summaries
     """)
 
 with col2:
     st.subheader("Streamlit Framework")
     st.markdown("""
     Streamlit handles:
-    - User interface (chat window)  
-    - Multi-page navigation  
-    - Session state for conversation & retrieved data  
-    - Rendering of tax data and email previews  
+    - User interface (chat window + tax portal display)
+    - Multi-page navigation
+    - Session state for conversation & tax records
+    - Real-time data display
+    - Password protection
     """)
 
-# Use Case 1
-st.header("📌 Use Case 1: AI Chatbot for Tax Queries & Record Retrieval")
+st.subheader("Other Technologies")
+col3, col4 = st.columns(2)
+
+with col3:
+    st.markdown("""
+    **Data Storage:**
+    - Pandas for CSV data manipulation
+    - tax_records.csv for taxpayer records
+    - Session state for runtime data
+    """)
+
+with col4:
+    st.markdown("""
+    **Email Integration:**
+    - SMTP for Gmail integration
+    - Environment variables for credentials
+    - Automated email-sending to upate the banks
+    """)
+
+st.markdown("---")
+st.header("📌 Use Case 1: General Tax Information Chat & Tax Record Retrieval")
 
 st.markdown("""
-This is the primary feature of the application. The AI simulates an **IRAS tax officer**  
-who can:
+This use case covers the basic chatbot functionality where users can:
+1. Provide their NRIC and Case Number to retrieve tax records
+2. View their tax assessment records in the My Tax Portal section
 
-1. Respond to general questions  
-2. Follow strict IRAS SOP through a long system instruction  
-3. Detect taxpayer NRIC and load tax data  
-4. Extract Case IDs from casual text  
-5. Conduct multi-step workflows such as **Bank Appointment Booking SOP**  
-6. Guide the user to MyTax Portal when needed  
-
-### 🔍 Functions Involved in Use Case 1
-
-| Function Name | Purpose |
-|---------------|---------|
-| **get_tax_data(nric)** | Retrieves taxpayer data from the CSV file |
-| **get_case_details(case_id)** | Gets details about the user's case |
-| **open_mytax_portal()** | Provides step-by-step instructions to log in to MyTax Portal |
-| **bank_appointment_flow()** | Multi-step IRAS workflow for bank appointments |
-
-### 🧠 Process Flow for Use Case 1
-
-1. **User sends a message**  
-2. System checks message for:
-   - NRIC  
-   - Case ID  
-   - Keywords indicating SOP workflow  
-3. System creates full AI prompt including:
-   - IRAS SOP  
-   - Conversation history  
-   - Function definitions  
-4. AI responds OR calls a tool:
-   - If NRIC → call `get_tax_data()`  
-   - If case number → call `get_case_details()`  
-   - If bank appointment → start SOP workflow  
-5. Tool returns data → AI interprets it → AI replies to user  
-6. Chat continues with updated context stored in session state  
-
-This flow ensures the assistant behaves like a structured, rule-based IRAS officer.
+### Key Features:
+- **NRIC & Case Number Extraction**: Automatic detection using regex patterns
+- **Tax Record Loading**: Real-time CSV data retrieval and display
+- **Conversational Interface**: Natural language Q&A with the AI
+- **Tax Portal Integration**: Auto-population of user tax information (to be connected to the actual IRAS system in future)
 """)
 
-# Use Case 2
-st.header("📧 Use Case 2: Automated Email Drafting & Sending")
+st.subheader("🔄 Use Case 1 Flowchart")
+mermaid_code_uc1 = """
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2D7BB9','primaryTextColor':'#fff','primaryBorderColor':'#1a5490','lineColor':'#1a5490','secondaryColor':'#f0f0f0','tertiaryColor':'#fff','edgeLabelBackground':'#ffffff'}}}%%
+graph LR
+    A([User Opens App]) --> B{Password OK?}
+    B -->|No| B
+    B -->|Yes| C[Chat Interface]
+    C --> D[User Message]
+    D --> E{NRIC/Case<br/>Detected?}
+    E -->|Yes| F[Load Tax Records<br/>from CSV]
+    E -->|No| G[AI Response]
+    F --> H[Display in<br/>Tax Portal]
+    H --> G[AI Processes<br/>& Responds]
+    G --> I[Update Chat]
+    I --> D
+
+    style A fill:#2D7BB9,stroke:#1a5490,color:#fff
+    style C fill:#4CAF50,stroke:#388E3C,color:#fff
+    style F fill:#FF9800,stroke:#F57C00,color:#fff
+    style H fill:#9C27B0,stroke:#7B1FA2,color:#fff
+    style G fill:#2196F3,stroke:#1976D2,color:#fff
+
+    linkStyle default stroke:#1a5490,stroke-width:2px,color:#000
+"""
+
+st.components.v1.html(f"""
+<div style="background-color: white; padding: 20px; border-radius: 10px; border: 2px solid #2D7BB9; overflow-x: auto;">
+    <pre class="mermaid">
+{mermaid_code_uc1}
+    </pre>
+    <style>
+        .edgeLabel {{ color: #000 !important; background-color: #fff !important; }}
+        .edgeLabel span {{ color: #000 !important; }}
+    </style>
+</div>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({{ startOnLoad: true }});
+</script>
+""", height=400)
+
+st.subheader("🔍 Technical Implementation Details")
 
 st.markdown("""
-The second major function of the system is **email automation**.
+### NRIC & Case Number Detection
+- **Regex Pattern for NRIC**: `[STFG]\d{7}[A-Z]` (e.g., S1111111A)
+- **Regex Pattern for Case Number**: `TX\d{3}` (case-insensitive, e.g., tx001, TX001)
+- Extraction happens in real-time as user types
 
-This feature activates during certain workflows, particularly the  
-**Bank Appointment SOP**, where an IRAS officer must email a bank  
-(e.g., UOB, DBS, OCBC, HSBC).
+### Tax Records Loading
+```python
+def load_tax_records(nric, case_number):
+    df = pd.read_csv("data/tax_records.csv")
+    filtered_df = df[(df['NRIC'] == nric) &
+                     (df['Case_Number'] == case_number)]
+    return filtered_df
+```
 
-### 🔓 Trigger Conditions
-Email preparation begins when:
-- The user reaches the final step of the bank appointment SOP  
-- The AI determines that a bank contact email is required  
+### Session State Management
+- `st.session_state.messages`: Stores chat history
+- `st.session_state.nric`: Current user NRIC
+- `st.session_state.case_number`: Current case number
+- `st.session_state.tax_records`: Loaded tax data (DataFrame)
 
-### ✉️ Functions Involved in Use Case 2
-
-| Function Name | Purpose |
-|---------------|---------|
-| **send_email(to, subject, message, sender, password)** | Sends email via SMTP |
-| **AI-generated email content** | The assistant drafts the text before sending |
-| **BANK_EMAILS mapping** | Automatically determines the correct bank mailbox |
-
-### 📬 Process Flow for Use Case 2
-
-1. AI gathers required information from the user:
-   - Bank name  
-   - Reason for appointment  
-   - Case number or tax reference  
-2. AI generates email content using the system prompt  
-3. System displays:
-   - Email preview  
-   - Recipient address  
-4. User confirms sending  
-5. SMTP function `send_email()` is executed with:
-   - Gmail SMTP server  
-   - Environment-stored credentials  
-   - Auto-mapped bank mailbox  
-6. Confirmation is returned to the user  
+### AI Context Enhancement
+When tax records are loaded, the AI receives:
+- Total Payable, Total Paid, Current Balance
+- Bank Appointment Details (if exists)
+- Instructions to use actual values (not placeholders)
 """)
 
-# Flowchart
-st.header("🧩 System Flowcharts")
+st.markdown("---")
+
+st.header("📧 Use Case 2: Bank Appointment Release Process")
 
 st.markdown("""
-The full workflow for both use cases is illustrated in the flowchart below.
+This use case represents the core workflow of the application - the complete bank appointment release process following IRAS Standard Operating Procedures (SOP).
 
-The file **flowchart.png** has been added to the GitHub repository and is displayed here:
+The system guides the user through a structured 4-step process:
+1. **Taxpayer Verification & Information Disclosure** - Extract NRIC/Case Number, retrieve and disclose tax information
+2. **Fund Availability Assessment** - Verify full appointment amount is available in appointed bank
+3. **Bank Account Confirmation** - Verify bank details and last 4 digits of account number
+4. **Release Determination & Summary** - Generate structured summary, make approval/rejection decision, send automated email if approved
+
+### Key Features:
+- **4-Step SOP Workflow**: Structured process following IRAS procedures
+- **Approval Criteria Validation**: AI evaluates all conditions before approving
+- **Automated Email Notification**: Sends release notice to appointed bank
+- **Real-time Portal Updates**: Displays "In Progress" status when approved
 """)
 
-st.image("flowchart.png", caption="Process flow of both use cases", use_column_width=True)
+st.subheader("🔄 Use Case 2 Flowchart")
 
-# Data Handling
-st.header("🔄 Data Flow Summary")
+mermaid_code_uc2_main = """
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2D7BB9','primaryTextColor':'#fff','primaryBorderColor':'#1a5490','lineColor':'#1a5490','secondaryColor':'#f0f0f0','tertiaryColor':'#fff','edgeLabelBackground':'#ffffff'}}}%%
+graph LR
+    A([NRIC & Case]) --> B[Load Records]
+    B --> C{Appt Exists?}
+    C -->|No| X1[End]
+    C -->|Yes| D[Step 1: Disclose Info]
+    D --> E[Step 2: Check Funds]
+    E --> F{Funds OK?}
+    F -->|No| X2[❌ Reject]
+    F -->|Yes| G[Step 3: Verify Bank]
+    G --> H{Bank Match?}
+    H -->|No| X3[❌ Reject]
+    H -->|Yes| I[Step 4: Summary]
+    I --> J{Approve?}
+    J -->|No| X4[❌ Reject]
+    J -->|Yes| K[✅ Approve]
+    K --> L[Email Bank]
+    L --> M[Portal: In Progress ✓]
+
+    style A fill:#2D7BB9,stroke:#1a5490,color:#fff
+    style D fill:#4CAF50,stroke:#388E3C,color:#fff
+    style E fill:#2196F3,stroke:#1976D2,color:#fff
+    style G fill:#9C27B0,stroke:#7B1FA2,color:#fff
+    style I fill:#FF9800,stroke:#F57C00,color:#fff
+    style K fill:#4CAF50,stroke:#388E3C,color:#fff
+    style X2 fill:#F44336,stroke:#D32F2F,color:#fff
+    style X3 fill:#F44336,stroke:#D32F2F,color:#fff
+    style X4 fill:#F44336,stroke:#D32F2F,color:#fff
+    style L fill:#00BCD4,stroke:#0097A7,color:#fff
+    style M fill:#4CAF50,stroke:#388E3C,color:#fff
+
+    linkStyle default stroke:#1a5490,stroke-width:2px,color:#000
+"""
+
+st.components.v1.html(f"""
+<div style="background-color: white; padding: 20px; border-radius: 10px; border: 2px solid #2D7BB9; overflow-x: auto;">
+    <pre class="mermaid">
+{mermaid_code_uc2_main}
+    </pre>
+    <style>
+        .edgeLabel {{ color: #000 !important; background-color: #fff !important; }}
+        .edgeLabel span {{ color: #000 !important; }}
+    </style>
+</div>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({{ startOnLoad: true }});
+</script>
+""", height=400)
+
+st.subheader("🔍 Technical Implementation Details")
+
+st.markdown("""
+### Approval Criteria (ALL must be met)
+1. ✓ Tax liability is fully settled OR full payment confirmed
+2. ✓ User confirms full appointment amount is available
+3. ✓ Bank matches appointed bank
+4. ✓ All required information provided (NRIC, Case Number, Bank Details, Account Number)
+
+### AI Summary Generation
+The AI generates a structured summary in this format:
+```
+Your request for bank appointment release is [APPROVED/REJECTED]
+REASON: [Explanation]
+
+CASE DETAILS:
+- NRIC: [value]
+- Case Number: [value]
+- Year of Assessment: [value]
+
+BANK APPOINTMENT INFORMATION:
+- Appointed Bank: [value]
+- Appointment Amount: S$[value]
+- Appointment Date: [value]
+
+TAX LIABILITY STATUS:
+- Total Payable: S$[value]
+- Total Paid: S$[value]
+- Current Balance: S$[value]
+
+FUND AVAILABILITY:
+- User confirmed: [YES/NO]
+
+VERIFICATION:
+- Bank Account Confirmed: [value]
+- Account Details: [last 4 digits]
+
+BANK_APPOINTMENT_RELEASE_APPROVED
+[If approved, includes this exact keyword]
+```
+
+### Approval Detection
+```python
+if "BANK_APPOINTMENT_RELEASE_APPROVED" in full_response:
+    st.session_state.bank_appointment_release_approved = True
+    # Trigger email sending
+    send_bank_release_email(...)
+```
+
+### Email Automation
+When approved, the system:
+1. Extracts Bank Appointment Information, Fund Availability, and Verification sections from summary
+2. Generates professional email to appointed bank
+3. Sends via Gmail SMTP with App Password
+4. Maps bank name to email address using BANK_EMAIL_MAPPING
+5. Confirms delivery to user
+
+### Email Template Structure
+- **Document Information**: Reference number, date, time
+- **Case Summary**: Extracted sections from AI summary
+- **Authorisation**: Official release statement
+- **Action Required**: Steps for bank to follow
+- **Contact Information**: IRAS contact details
+""")
+
+st.markdown("---")
+
+# Data Flow
+st.header("🔄 Complete Data Flow Architecture")
 
 st.markdown("""
 ### Data Sources
-- **tax_records.csv** — contains taxpayer details  
-- **.env** — stores API keys, email passwords, bank email mappings  
-- **System Prompt** — defines IRAS officer behavior and SOP  
+1. **tax_records.csv** — Contains taxpayer records with columns:
+   - NRIC, Case_Number, Date, Description, Year_of_Assessment
+   - Payable, Paid, Balance
+   - Bank_Appointment_Date, Appointed_Bank, Appointment_Amount
+
+2. **.env / Streamlit Secrets** — Stores sensitive configuration:
+   - OPENAI_API_KEY: OpenAI API authentication
+   - APP_PASSWORD: Application password protection
+   - SMTP credentials: Email sending configuration
+   - BANK_EMAILS: Bank name to email address mappings
+   - IRAS_CONTACT_*: Contact information for emails
+
+3. **SOP.txt** — Standard Operating Procedures document defining:
+   - Process flow requirements
+   - Question formats
+   - Approval criteria
+   - Rejection scenarios
 
 ### Internal Data Flow
-1. User input →  
-2. NRIC/Case detection →  
-3. Data retrieval via tools →  
-4. AI reasoning + response streaming →  
-5. Optional email sending →  
-6. Display to user via Streamlit  
+```
+1. User Input (Chat Message)
+   ↓
+2. Regex Extraction (NRIC/Case Number)
+   ↓
+3. Session State Update
+   ↓
+4. CSV Data Loading (if NRIC/Case found)
+   ↓
+5. AI Context Preparation (System Prompt + Tax Data)
+   ↓
+6. OpenAI API Call (GPT-3.5 Turbo)
+   ↓
+7. AI Response Processing
+   ↓
+8. Approval Detection (keyword search)
+   ↓
+9. Email Sending (if approved)
+   ↓
+10. UI Update (Chat + Tax Portal + Status)
+```
+
+### Session State Variables
+- `messages`: List of chat messages (role + content)
+- `nric`: Current user NRIC
+- `case_number`: Current case number
+- `tax_records`: Pandas DataFrame of loaded records
+- `bank_name`: Extracted bank name from conversation
+- `bank_appointment_release_approved`: Boolean approval flag
+- `email_sent`: Boolean to prevent duplicate emails
+- `release_summary`: Stored AI summary for email
+- `password_correct`: Password authentication status
+- `input_key`: Counter for clearing input field
 """)
 
-# Footer
 st.markdown("---")
-st.markdown("Built with ❤️ using Streamlit & OpenAI •")
+
+# Security & Best Practices
+st.header("🔒 Security & Best Practices")
+
+col_sec1, col_sec2 = st.columns(2)
+
+with col_sec1:
+    st.subheader("Security Measures")
+    st.markdown("""
+    ✅ **Password Protection**
+    - All users must authenticate before accessing app
+    - Password stored in environment variables
+
+    ✅ **API Key Security**
+    - OpenAI API key stored in secrets
+    - Environment variable loading with python-dotenv
+
+    ✅ **Email Security**
+    - Gmail App Password
+    - SMTP authentication required
+    - Credentials never displayed to user
+
+    ✅ **Data Privacy**
+    - Tax data loaded per session
+    - No logging of sensitive information
+    - Session state cleared on browser refresh
+    """)
+
+with col_sec2:
+    st.subheader("Best Practices Implemented")
+    st.markdown("""
+    ✅ **Error Handling**
+    - Try-catch blocks for API calls
+    - Graceful degradation on failures
+    - User-friendly error messages
+
+    ✅ **Data Validation**
+    - Regex validation for NRIC/Case patterns
+    - Bank name verification
+    - Appointment amount checks
+
+    ✅ **AI Safety**
+    - Structured system prompts
+    - Step-by-step conversation flow
+    - Explicit approval criteria
+    - Keyword-based approval detection
+
+    ✅ **Code Organization**
+    - Modular functions
+    - Clear separation of concerns
+    - Comprehensive debug logging
+    """)
+
+st.markdown("---")
+
+
+st.markdown("""
+## 📚 Additional Resources
+
+- **SOP.txt**: Complete Standard Operating Procedures
+- **tax_records.csv**: Sample tax data structure
+- **DEPLOYMENT.md**: Deployment guide for Streamlit Community Cloud
+- **.env.example**: Environment variable template
+
+---
+
+Built using Streamlit & OpenAI • IRAS Enforcement Officer Assistant Prototype (AI Bootcamp)
+""")

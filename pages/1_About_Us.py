@@ -14,10 +14,9 @@ st.title("👥 About Us")
 st.markdown("""
 ## Welcome to the IRAS Enforcement Officer Virtual Assistant
 
-This project was developed as part of the **AI Bootcamp**, with the goal of building  
-a practical, workflow-enhancing AI system that simulates how IRAS enforcement tax officers  
-interact with taxpayers through structured conversation, SOP-driven guidance,  
-and automated processes.
+This project was developed as part of the **AI Bootcamp** to demonstrate a practical,  
+workflow-enhancing AI system that simulates how IRAS Enforcement Officers interact  
+with taxpayers using SOP-driven guidance, structured dialogs, and automated processes.
 
 The app combines:
 - AI-driven conversation flows  
@@ -29,83 +28,99 @@ The app combines:
 All within a single guided interface designed to mimic a CRM environment.
 """)
 
-# Mission & Vision
-col1, col2 = st.columns(2)
+# Objectives & Scope
+st.header("🎯 Project Objectives")
+st.markdown("""
+The primary goals of this project are to:
 
-with col1:
-    st.header("🎯 Project Mission")
-    st.markdown("""
-    To create an AI-powered tool that:
-    - Assists IRAS enforcement officers in responding to taxpayer queries  
-    - Automates SOP-driven tasks (e.g., bank appointment process)  
-    - Improves accuracy by referencing real working instructions  
-    - Reduces officer load by automating email drafting & information retrieval  
-    """)
+- Build an AI assistant that helps Enforcement Officers respond to taxpayer queries  
+- Automate SOP-driven tasks (e.g., Bank Appointment Release workflow)  
+- Improve accuracy by referencing structured IRAS working instructions  
+- Reduce officer workload by automating email drafting and lookup processes (for taxpayer information in the internal system)   
+""")
 
-with col2:
-    st.header("🔭 Project Scope & Vision")
-    st.markdown("""
-    This project focuses on simulating **real IRAS workflows**, including:
+st.header("🔭 Project Scope")
+st.markdown("""
+This prototype focuses on simulating key **IRAS Enforcement workflows**, including:
 
-    - Loading structured taxpayer data  
-    - Searching tax records by NRIC  
-    - Handling case ID extraction from natural text  
-    - Executing multi-step SOP dialogs for bank appointments  
-    - Drafting emails to banks based on predefined formats  
-    - Showing relevant IRAS information succinctly  
+- Searching taxpayer records by NRIC  
+- Extracting case IDs from natural text  
+- Executing step-by-step SOP dialogs  
+- Drafting emails to banks for appointment releases  
+- Following strict system rules to reduce hallucination  
 
-    The long-term vision is to show how AI can assist public service officers  
-    while remaining compliant, structured, and safe.
-    """)
+This project is a proof-of-concept to showcase how generative AI can be embedded  
+into structured government workflows.
+""")
 
-# What We Offer
-st.header("💡 Features Implemented")
+# Data Sources
+st.header("📚 Data Sources")
+st.markdown("""
+This application uses structured datasets and reference materials to simulate IRAS operations:
+
+### **Internal-style Reference Data (Demo)**
+- **Taxpayer Records CSV**  
+  Contains simulated taxpayer information (NRIC, name, tax types, balances, etc.).
+  Includes mock enforcement case information used for lookup and validation.
+
+- **Bank Email Directory**  
+  A predefined mapping of bank names to contact emails for appointment release requests.
+
+### **Procedure & SOP Resources**
+- **IRAS Bank Appointment Release SOP** (fabricated for demo)   
+- **Email Draft Templates**  
+- **Mock-up of My Tax Portal Navigation**
+
+> *All datasets and instructions used in this project are mock/demo versions  
+and do not contain actual taxpayer information.*
+""")
+
+# Section: Features
+st.header("💡 Key Features")
 
 st.markdown("""
-### 🧠 AI-Powered Chat Layer
-- Structured system prompt based on IRAS SOPs  
-- Strict persona and rule enforcement  
-- Multi-step guided flows (e.g., bank appointments)  
-- Automatic detection of NRIC → loads tax records  
+### 🧠 AI-Powered Conversation Engine
+- Structured persona based on IRAS enforcement roles  
+- Multi-step guided SOP flows  
+- NRIC detection → auto-load taxpayer data  
 - Case number extraction logic  
-- No hallucination enforced through system message constraints  
+- Hallucination minimised using strict prompting rules
 
 ### 📨 Email Automation
-- Auto-generated email drafts to banks  
-- Send via SMTP through preset credentials  
-- Predefined mappings for bank names → email addresses  
+- Auto-generated draft emails to banks  
+- SMTP sending enabled through preset credentials  
+- Predefined bank → email routing logic
 
-### 📁 Data Handling
-- CSV lookup for taxpayer records  
-- Session state for conversation memory  
-- PDF/website links for MyTax Portal instructions  
+### 📁 Data & Workflow Handling
+- CSV-based taxpayer data lookup  
+- Case detail retrieval  
+- Session state for conversation memory   
 
 ### 🖥️ Streamlit Interface
-- Custom layout for a chatbot window  
-- Conversation history tracking  
-- Tool functions that AI can call to:  
-  - get_tax_data  
-  - get_case_details  
-  - send_email  
-  - open_mytax_portal  
+- Chat-style interaction window  
+- Tool call simulation (get_tax_data, get_case_details, send_email, etc.)  
+- Clean, wide-layout experience for officer workflows  
 """)
 
-# Team Section
-st.header("👨‍👩‍👧‍👦 The Team")
+# Section: Team
+st.header("👨‍👩‍👧‍👦 Project Team")
 st.markdown("""
-This project was created IRAS enforcement officers, dedicated to demonstrating  
-how AI can enhance operational processes within government agencies.
+Developed as part of the **AI Bootcamp Capstone Project** by:
+- **Lee Sumi**  
+- **Eugene Wong**  
+- **He Jinming**
 
-*(Lee Sumi, Eugene Wong, He Jinming)*
+The project demonstrates how AI can enhance operational processes  
+within public sector enforcement environments.
 """)
 
-# Contact
-st.header("📧 Contact")
-st.markdown("""
-If you have questions or would like to learn more about this project, feel free  
-to reach out to the AI Bootcamp instructors or your project team lead.
-""")
+# # Section: Contact
+# st.header("📧 Contact")
+# st.markdown("""
+# If you have questions or would like to know more about this project,  
+# please reach out to your AI Bootcamp instructor or project team lead.
+# """)
 
 # Footer
 st.markdown("---")
-st.markdown("Built with ❤️ using Streamlit & OpenAI • IRAS Tax Officer Simulation Project")
+st.markdown("Built using Streamlit & OpenAI • IRAS Enforcement Officer Assistant Prototype (AI Bootcamp)")

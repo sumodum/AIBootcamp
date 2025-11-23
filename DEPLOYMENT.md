@@ -57,7 +57,7 @@ In the "Advanced settings" section, add the environment variables as secrets:
    2. **Replace the placeholder values** with the actual credentials:
       - `your_openai_api_key` → Your OpenAI API key
       - `your_chosen_password` → The password users will need to access the app
-      - `your_gmail_address` → Your Gmail address (e.g., nomgiraffenom@gmail.com)
+      - `your_gmail_address` → Your Gmail address
       - `your_gmail_app_password` → Your Gmail App Password (16-character code)
 
    3. Click "Save"

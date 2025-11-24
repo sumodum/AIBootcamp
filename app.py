@@ -486,11 +486,22 @@ if send_button and user_input:
         B. Mandatory Information Disclosure (CRITICAL - DO THIS IMMEDIATELY):
             If the system context shows “CURRENT TAX RECORDS FOR USER”, you must IMMEDIATELY disclose their tax and bank appointment details in this same first response.
 
-        B1. Check if BANK APPOINTMENT DETAILS exist
-            If YES, continue with disclosure.
-            If NO, inform user they have no active bank appointment and stop the process.
+        B1. Check if BANK APPOINTMENT DETAILS exist in the system context
 
-        B2. Required Immediate Disclosure (must use actual data provided):
+            If BANK APPOINTMENT DETAILS shows "NO ACTIVE BANK APPOINTMENT":
+                You MUST immediately inform the user with this response:
+                "Hello! Thank you for providing your NRIC and case number. I've retrieved your tax information.
+
+                I can see that you currently have no active bank appointment on your account. Therefore, the bank appointment release process cannot proceed.
+
+                However, I can still assist you with other Individual Income Tax (IIT) enquiries. How may I help you?"
+
+                Then STOP - do not proceed with the bank appointment release process.
+
+            If BANK APPOINTMENT DETAILS exist (has Appointed Bank, Amount, Date):
+                Continue with disclosure in B2 below.
+
+        B2. Required Immediate Disclosure when Bank Appointment EXISTS (must use actual data provided):
             You must provide ALL details in your response. Follow this example format EXACTLY, replacing the values with the actual data from the tax records:
 
             Example format (use actual values from CURRENT TAX RECORDS FOR USER section):
@@ -629,6 +640,13 @@ if send_button and user_input:
                         - Appointment Date: {appt_row['Bank_Appointment_Date']}
                         - Year of Assessment: {appt_row['Year_of_Assessment']}
                         """
+                    else:
+                        bank_appt_info = """
+                        BANK APPOINTMENT DETAILS:
+                        - Status: NO ACTIVE BANK APPOINTMENT
+
+                        IMPORTANT: Inform the user that there is no active bank appointment on their account. The bank appointment release process cannot proceed.
+                        """
 
                     # Get tax liability summary
                     total_payable = filtered_df['Payable'].sum()
@@ -647,7 +665,8 @@ if send_button and user_input:
 
                     IMPORTANT INSTRUCTIONS:
                     - Use exact values when disclosing information to the user
-                    - When stating "I can see you have a bank appointment with...", use the values from BANK APPOINTMENT DETAILS above
+                    - If BANK APPOINTMENT DETAILS shows "NO ACTIVE BANK APPOINTMENT", inform the user immediately that there is no bank appointment on their account and the release process cannot proceed
+                    - If there IS a bank appointment, when stating "I can see you have a bank appointment with...", use the values from BANK APPOINTMENT DETAILS above
                     - When stating "Your total tax liability...", use the Total Payable value from TAX LIABILITY SUMMARY above
                     - When asking about fund availability, use the Appointment Amount from BANK APPOINTMENT DETAILS above
                     - Use the actual data provided above, not the placeholders like [Amount] or [Bank Name]

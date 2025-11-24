@@ -130,8 +130,8 @@ st.subheader("🔍 Technical Implementation Details")
 
 st.markdown("""
 ### NRIC & Case Number Detection
-- **Regex Pattern for NRIC**: `[STFG]\d{7}[A-Z]` (e.g., S1111111A)
-- **Regex Pattern for Case Number**: `TX\d{3}` (case-insensitive, e.g., tx001, TX001)
+- **Regex Pattern for NRIC**: `\b[STFG]\d{7}[A-Z]\b` (e.g., S1111111A)
+- **Regex Pattern for Case Number**: `\bTX\d{3}\b'` (case-insensitive, e.g., tx001, TX001)
 - Extraction happens in real-time as user types
 
 ### Tax Records Loading

@@ -436,7 +436,6 @@ if send_button and user_input:
         st.session_state.input_key += 1
         st.rerun()
 
-    # Load fresh tax records from CSV when NRIC and Case Number are available
     if st.session_state.nric and st.session_state.case_number:
         st.session_state.tax_records = load_tax_records(st.session_state.nric, st.session_state.case_number)
 

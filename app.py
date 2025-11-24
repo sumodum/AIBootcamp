@@ -370,17 +370,23 @@ with st.form(key=f"chat_form_{st.session_state.input_key}", clear_on_submit=True
         send_button = st.form_submit_button("▶", use_container_width=True)
 
 if send_button and user_input:
-    # Extract NRIC and Case Number using regex
     extracted_nric, extracted_case = extract_nric_case(user_input)
+
+    # Check if user already has valid NRIC and Case Number in session
+    # If yes, skip all validation as they're in the conversation flow
+    already_authenticated = st.session_state.nric and st.session_state.case_number
 
     # Check if user is trying to provide NRIC or Case Number based on keywords
     user_input_lower = user_input.lower()
     mentions_nric = any(keyword in user_input_lower for keyword in ['nric', 'ic number', 'identification'])
     mentions_case = any(keyword in user_input_lower for keyword in ['case number', 'case no', 'case id', 'tx'])
 
+    # Check if user is providing bank account information
+    mentions_bank_account = any(keyword in user_input_lower for keyword in ['account', 'last 4 digits', 'last four', 'bank account', 'account number'])
+
     # If user mentions NRIC but no valid NRIC was extracted, check for invalid formats
-    if mentions_nric and not extracted_nric:
-        # Look for any number sequences that might be an attempted NRIC
+    # Skip validation if user is already authenticated, in conversation flow
+    if mentions_nric and not extracted_nric and not already_authenticated:
         has_numbers = bool(re.search(r'\d+', user_input))
         if has_numbers:
             st.session_state.messages.append({"role": "user", "content": user_input})
@@ -392,8 +398,8 @@ if send_button and user_input:
             st.session_state.input_key += 1
             st.rerun()
 
-    # If user mentions case number but no valid case number was extracted
-    if mentions_case and not extracted_case and not extracted_nric:  # Don't trigger if valid NRIC found
+    # If user mentions case number but no valid case number was extracted, skip validation if user is already authenticated
+    if mentions_case and not extracted_case and not extracted_nric and not already_authenticated:
         has_numbers = bool(re.search(r'\d+', user_input))
         if has_numbers:
             st.session_state.messages.append({"role": "user", "content": user_input})
@@ -427,9 +433,10 @@ if send_button and user_input:
             st.session_state.input_key += 1
             st.rerun()
 
-    # Check for partial/invalid patterns only if no keywords were mentioned
+    # Check for partial/invalid patterns only if no keywords were mentioned AND not bank account context
+    # Skip validation if user is already authenticated (in conversation flow)
     validation_feedback = check_partial_nric_or_case(user_input)
-    if validation_feedback and not extracted_nric and not extracted_case and not mentions_nric and not mentions_case:
+    if validation_feedback and not extracted_nric and not extracted_case and not mentions_nric and not mentions_case and not mentions_bank_account and not already_authenticated:
         feedback_message = "\n\n".join(validation_feedback)
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.session_state.messages.append({"role": "assistant", "content": feedback_message})

@@ -117,6 +117,44 @@ def extract_nric_case(text):
 
     return nric_match.group(0).upper() if nric_match else None, case_match.group(0).upper() if case_match else None
 
+def validate_nric_format(nric):
+    """Validate NRIC format: Must start with S/T/F/G, followed by 7 digits and 1 letter."""
+    if not nric:
+        return False, "NRIC not provided"
+
+    nric_pattern = r'^[STFG]\d{7}[A-Z]$'
+    if not re.match(nric_pattern, nric.upper()):
+        return False, "Invalid NRIC format. Expected format: S/T/F/G followed by 7 digits and 1 letter (e.g., S1234567A)"
+
+    return True, "Valid NRIC format"
+
+def validate_case_number_format(case_number):
+    """Validate Case Number format: Must be TX followed by 3 digits."""
+    if not case_number:
+        return False, "Case Number not provided"
+
+    case_pattern = r'^TX\d{3}$'
+    if not re.match(case_pattern, case_number.upper()):
+        return False, "Invalid Case Number format. Expected format: TX followed by 3 digits (e.g., TX001)"
+
+    return True, "Valid Case Number format"
+
+def check_partial_nric_or_case(text):
+    feedback = []
+
+    potential_nric = re.findall(r'\b[STFG]?\d{1,7}[A-Z]?\b', text, re.IGNORECASE)
+    for match in potential_nric:
+        if match and not re.match(r'^[STFG]\d{7}[A-Z]$', match.upper()):
+            if len(match) > 3:
+                feedback.append(f"⚠️ '{match}' looks like an incomplete NRIC. Format should be: S/T/F/G + 7 digits + 1 letter (e.g., S1234567A)")
+
+    potential_case = re.findall(r'\bTX\d{0,3}\b', text, re.IGNORECASE)
+    for match in potential_case:
+        if match and not re.match(r'^TX\d{3}$', match.upper()):
+            feedback.append(f"⚠️ '{match}' looks like an incomplete Case Number. Format should be: TX + 3 digits (e.g., TX001)")
+
+    return feedback
+
 # Function to extract bank name
 def extract_bank_name(text):
     text_upper = text.upper()
@@ -332,11 +370,71 @@ with st.form(key=f"chat_form_{st.session_state.input_key}", clear_on_submit=True
         send_button = st.form_submit_button("▶", use_container_width=True)
 
 if send_button and user_input:
+    # Extract NRIC and Case Number using regex
     extracted_nric, extracted_case = extract_nric_case(user_input)
+
+    # Check if user is trying to provide NRIC or Case Number based on keywords
+    user_input_lower = user_input.lower()
+    mentions_nric = any(keyword in user_input_lower for keyword in ['nric', 'ic number', 'identification'])
+    mentions_case = any(keyword in user_input_lower for keyword in ['case number', 'case no', 'case id', 'tx'])
+
+    # If user mentions NRIC but no valid NRIC was extracted, check for invalid formats
+    if mentions_nric and not extracted_nric:
+        # Look for any number sequences that might be an attempted NRIC
+        has_numbers = bool(re.search(r'\d+', user_input))
+        if has_numbers:
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            st.session_state.messages.append({"role": "assistant", "content":
+                "❌ I detected you mentioned 'NRIC' but the format appears to be incorrect.\n\n"
+                "**Valid NRIC format:** Must start with S, T, F, or G, followed by exactly 7 digits and 1 letter.\n"
+                "**Example:** S1234567A\n\n"
+                "Please provide your NRIC in the correct format."})
+            st.session_state.input_key += 1
+            st.rerun()
+
+    # If user mentions case number but no valid case number was extracted
+    if mentions_case and not extracted_case and not extracted_nric:  # Don't trigger if valid NRIC found
+        has_numbers = bool(re.search(r'\d+', user_input))
+        if has_numbers:
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            st.session_state.messages.append({"role": "assistant", "content":
+                "❌ I detected you mentioned 'case number' but the format appears to be incorrect.\n\n"
+                "**Valid Case Number format:** Must be TX followed by exactly 3 digits.\n"
+                "**Example:** TX001\n\n"
+                "Please provide your Case Number in the correct format."})
+            st.session_state.input_key += 1
+            st.rerun()
+
+    # Validate extracted NRIC if found
     if extracted_nric:
-        st.session_state.nric = extracted_nric
+        is_valid, message = validate_nric_format(extracted_nric)
+        if is_valid:
+            st.session_state.nric = extracted_nric
+        else:
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            st.session_state.messages.append({"role": "assistant", "content": f"❌ {message}\n\nPlease provide a valid NRIC in the format: S/T/F/G followed by 7 digits and 1 letter (e.g., S1234567A)"})
+            st.session_state.input_key += 1
+            st.rerun()
+
+    # Validate extracted Case Number if found
     if extracted_case:
-        st.session_state.case_number = extracted_case
+        is_valid, message = validate_case_number_format(extracted_case)
+        if is_valid:
+            st.session_state.case_number = extracted_case
+        else:
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            st.session_state.messages.append({"role": "assistant", "content": f"❌ {message}\n\nPlease provide a valid Case Number in the format: TX followed by 3 digits (e.g., TX001)"})
+            st.session_state.input_key += 1
+            st.rerun()
+
+    # Check for partial/invalid patterns only if no keywords were mentioned
+    validation_feedback = check_partial_nric_or_case(user_input)
+    if validation_feedback and not extracted_nric and not extracted_case and not mentions_nric and not mentions_case:
+        feedback_message = "\n\n".join(validation_feedback)
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.messages.append({"role": "assistant", "content": feedback_message})
+        st.session_state.input_key += 1
+        st.rerun()
 
     # Load fresh tax records from CSV when NRIC and Case Number are available
     if st.session_state.nric and st.session_state.case_number:
